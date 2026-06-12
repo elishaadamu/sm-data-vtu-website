@@ -81,24 +81,7 @@ const services = [
     color: "from-amber-500 to-orange-600",
     bgGlow: "group-hover:shadow-amber-500/20",
   },
-  {
-    title: "BVN & NIN Slips",
-    description:
-      "Access identity verification services from one convenient dashboard.",
-    icon: ReceiptText,
-    href: "/signin",
-    color: "from-rose-500 to-pink-600",
-    bgGlow: "group-hover:shadow-rose-500/20",
-  },
-  {
-    title: "Airtime to Cash",
-    description:
-      "Convert excess airtime to wallet value with ease. Best conversion rates.",
-    icon: CreditCard,
-    href: "/signin",
-    color: "from-cyan-500 to-sky-600",
-    bgGlow: "group-hover:shadow-cyan-500/20",
-  },
+
 ];
 
 const stats = [

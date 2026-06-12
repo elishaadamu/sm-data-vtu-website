@@ -134,16 +134,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, handleLogout }) => {
                       label: "NECO Scratch Card",
                       icon: FaIdCard,
                     },
-                    {
-                      href: "/dashboard/services/ipe",
-                      label: "IPE Verification",
-                      icon: FaBolt,
-                    },
-                    {
-                      href: "/dashboard/services/free-ipe-check",
-                      label: "Free IPE Check",
-                      icon: FaSearch,
-                    },
+
                     {
                       href: "/dashboard/services/data",
                       label: "Data Subscription",
@@ -163,11 +154,6 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, handleLogout }) => {
                       href: "/dashboard/services/electric",
                       label: "Electricity Bills",
                       icon: FaBolt,
-                    },
-                    {
-                      href: "/dashboard/services/airtime-to-cash",
-                      label: "Airtime to Cash",
-                      icon: FaExchangeAlt,
                     },
                   ].map(({ href, label, icon: Icon }) => (
                     <Link
@@ -219,11 +205,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, handleLogout }) => {
                       label: "NECO History",
                       icon: FaIdCard,
                     },
-                    {
-                      href: "/dashboard/history/ipe",
-                      label: "IPE History",
-                      icon: FaBolt,
-                    },
+
                     {
                       href: "/dashboard/history/airtime",
                       label: "Airtime History",

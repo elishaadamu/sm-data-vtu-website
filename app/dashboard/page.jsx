@@ -73,7 +73,7 @@ const ServicesLayout = () => {
       bgGradient: "from-red-50 to-rose-50",
     },
     {
-      name: "WAEC Scratch Card",
+      name: "WAEC",
       icon: <FaFileAlt className="w-5 h-5" />,
       description: "Purchase WAEC scratch cards instantly",
       path: "dashboard/services/waec",
@@ -81,7 +81,7 @@ const ServicesLayout = () => {
       bgGradient: "from-green-50 to-emerald-50",
     },
     {
-      name: "NECO Scratch Card",
+      name: "NECO",
       icon: <FaIdCard className="w-5 h-5" />,
       description: "Purchase NECO token / scratch cards instantly",
       path: "dashboard/services/neco",
