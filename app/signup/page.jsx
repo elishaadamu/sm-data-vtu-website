@@ -63,7 +63,7 @@ const page = () => {
 
       // 2. Automatically Perform Login
       const loginPayload = {
-        phone: payload.phone,
+        email: payload.email,
         password: payload.password,
       };
 

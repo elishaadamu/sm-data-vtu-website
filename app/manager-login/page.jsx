@@ -8,6 +8,9 @@ import { encryptData } from "@/lib/encryption";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaEye, FaEyeSlash, FaShieldAlt } from "react-icons/fa";
+import axios from "axios";
+import { apiUrl, API_CONFIG } from "@/configs/api";
+import Swal from "sweetalert2";
 
 const ManagerLogin = () => {
   const router = useRouter();
@@ -20,26 +23,54 @@ const ManagerLogin = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Mock Administrator Validation
-    setTimeout(() => {
-      if (email === "admin@smdata.com" && password === "adminpassword") {
-        const adminData = {
-          role: "admin",
-          email: "admin@smdata.com",
-          name: "System Administrator",
-          _id: "admin_101",
-        };
+    try {
+      const payload = { email, password };
+      const response = await axios.post(
+        apiUrl(API_CONFIG.ENDPOINTS.AUTH.SIGNIN),
+        payload
+      );
 
-        const encryptedAdmin = encryptData(adminData);
-        localStorage.setItem("manager_user", encryptedAdmin);
-        toast.success("Welcome back, Administrator!");
-        
-        router.push("/manager");
-      } else {
-        toast.error("Invalid administrator credentials.");
-        setLoading(false);
+      if (!response.data) {
+        throw new Error("No data received from server");
       }
-    }, 1200); // Simulate network request
+
+      const userData = response.data;
+
+      // Ensure that only admins or managers can login here
+      if (userData.role !== "admin" && userData.role !== "manager") {
+        setLoading(false);
+        Swal.fire({
+          title: "Access Denied",
+          text: "You are not an administrator. Please log in through the regular user portal.",
+          icon: "error",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Go to User Login",
+          cancelButtonText: "Cancel"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            router.push("/signin");
+          }
+        });
+        return;
+      }
+
+      // Valid admin -> Encrypt and save session
+      const encryptedAdmin = encryptData(userData);
+      localStorage.setItem("manager_user", encryptedAdmin);
+      toast.success(`Welcome back, ${userData.firstName || userData.fullName || 'Administrator'}!`);
+      
+      router.push("/manager");
+
+    } catch (error) {
+      console.error("Error signing in as admin:", error);
+      toast.error(
+        error.response?.data?.message || "An error occurred during admin signin."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -73,21 +104,23 @@ const ManagerLogin = () => {
 
           <div className="flex flex-col gap-1.5 relative">
             <label className="text-sm font-medium text-slate-300">Password</label>
-            <input
-              onChange={(e) => setPassword(e.target.value)}
-              value={password}
-              className="bg-black/20 border border-white/10 p-3 rounded-xl pr-10 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-slate-400"
-              type={showPassword ? "text" : "password"}
-              placeholder="••••••••"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-9 mt-0.5 text-slate-400 hover:text-white transition-colors"
-            >
-              {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
-            </button>
+            <div className="relative flex items-center w-full">
+               <input
+                 onChange={(e) => setPassword(e.target.value)}
+                 value={password}
+                 className="bg-black/20 border border-white/10 p-3 rounded-xl pr-10 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-slate-400 w-full"
+                 type={showPassword ? "text" : "password"}
+                 placeholder="••••••••"
+                 required
+               />
+               <button
+                 type="button"
+                 onClick={() => setShowPassword(!showPassword)}
+                 className="absolute right-3 text-slate-400 hover:text-white transition-colors flex items-center justify-center h-full"
+               >
+                 {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
+               </button>
+            </div>
           </div>
 
           <button

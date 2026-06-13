@@ -16,7 +16,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 const page = () => {
   const router = useRouter();
   const { fetchUserData } = useAppContext();
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -31,7 +31,7 @@ const page = () => {
       return;
     }
 
-    const payload = { phone, password };
+    const payload = { email, password };
     console.log("Login Payload:", payload);
     try {
       const response = await axios.post(
@@ -88,13 +88,13 @@ const page = () => {
         <p className="text-center font-semibold text-xl">Welcome back!</p>
         <h2 className="text-left text-gray-500">Signin as a User</h2>
         <div className="flex flex-col gap-1">
-          <label>Phone Number</label>
+          <label>Email Address</label>
           <input
-            onChange={(e) => setPhone(e.target.value)}
-            value={phone}
+            onChange={(e) => setEmail(e.target.value)}
+            value={email}
             className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
-            type="tel"
-            placeholder="Enter your phone number"
+            type="email"
+            placeholder="Enter your email address"
             required
           />
         </div>
