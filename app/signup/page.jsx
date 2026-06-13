@@ -1,9 +1,8 @@
 "use client";
 import Image from "next/image";
 import Logo from "@/assets/logo/sm-data.png";
-
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -15,94 +14,49 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const page = () => {
   const router = useRouter();
-  // const searchParams = useSearchParams(); // Removed direct call to avoid SSR issues
   const { fetchUserData } = useAppContext();
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
+    fullName: "",
     phone: "",
-    password: "",
-    nin: "",
+    email: "",
+    passcode: "",
+    confirmPasscode: "",
+    referralCode: "",
   });
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState({
-    strength: "",
-    hasMinLength: false,
-    hasUpperCase: false,
-    hasLowerCase: false,
-    hasNumbers: false,
-    hasSpecialChars: false,
-  });
-
-  const validatePassword = (password) => {
-    const hasMinLength = password.length >= 8;
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumbers = /\d/.test(password);
-    const hasSpecialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(
-      password
-    );
-
-    let strength = "Weak";
-    const meetsRequirements =
-      hasMinLength + hasUpperCase + hasLowerCase + hasNumbers + hasSpecialChars;
-
-    if (meetsRequirements >= 5) {
-      strength = "Strong";
-    } else if (meetsRequirements >= 3) {
-      strength = "Medium";
-    }
-
-    setPasswordStrength({
-      strength,
-      hasMinLength,
-      hasUpperCase,
-      hasLowerCase,
-      hasNumbers,
-      hasSpecialChars,
-    });
-  };
+  const [showPasscode, setShowPasscode] = useState(false);
+  const [showConfirmPasscode, setShowConfirmPasscode] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-
-    if (name === "password") {
-      validatePassword(value);
-    }
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    if (formData.password.length < 8) {
-      toast.error("Password must be at least 8 characters long.");
+    if (!/^\d{6}$/.test(formData.passcode)) {
+      toast.error("Passcode must be exactly 6 digits.");
       setLoading(false);
       return;
     }
 
-    if (
-      !passwordStrength.hasUpperCase ||
-      !passwordStrength.hasLowerCase ||
-      !passwordStrength.hasNumbers ||
-      !passwordStrength.hasSpecialChars
-    ) {
-      toast.error(
-        "Password must contain uppercase, lowercase, numbers, and special characters."
-      );
+    if (formData.passcode !== formData.confirmPasscode) {
+      toast.error("Passcodes do not match.");
       setLoading(false);
       return;
     }
 
-    console.log("Signup payload:", formData);
+    // Exclude confirmPasscode from the payload sent to the backend
+    const { confirmPasscode, ...payload } = formData;
+    
+    console.log("Signup payload:", payload);
 
     try {
       const response = await axios.post(
         apiUrl(API_CONFIG.ENDPOINTS.AUTH.SIGNUP),
-        formData
+        payload
       );
       const { user } = response.data;
 
@@ -140,197 +94,114 @@ const page = () => {
           />
         </Link>
         <p className="text-center font-semibold text-xl">Create an account</p>
-        <div className="flex gap-4">
-          <div className="flex flex-col gap-1 w-1/2">
-            <label>First Name</label>
-            <input
-              name="firstName"
-              onChange={handleChange}
-              value={formData.firstName}
-              className="border p-2 rounded-md"
-              type="text"
-              placeholder="Enter your first name"
-            />
-          </div>
-          <div className="flex flex-col gap-1 w-1/2">
-            <label>Last Name</label>
-            <input
-              name="lastName"
-              onChange={handleChange}
-              value={formData.lastName}
-              className="border p-2 rounded-md"
-              type="text"
-              placeholder="Enter your last name"
-            />
-          </div>
-        </div>
+        
         <div className="flex flex-col gap-1">
-          <label>Email</label>
+          <label>Full Name</label>
           <input
-            name="email"
+            name="fullName"
             onChange={handleChange}
-            value={formData.email}
-            className="border p-2 rounded-md"
-            type="email"
-            placeholder="Enter your email"
+            value={formData.fullName}
+            className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+            type="text"
+            placeholder="Enter your full name"
+            required
           />
         </div>
+
         <div className="flex flex-col gap-1">
           <label>Phone Number</label>
           <input
             name="phone"
             onChange={handleChange}
             value={formData.phone}
-            className="border p-2 rounded-md"
+            className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
             type="tel"
             placeholder="Enter your phone number"
+            required
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label>NIN (National Identification Number)</label>
+          <label>Email</label>
           <input
-            name="nin"
+            name="email"
             onChange={handleChange}
-            value={formData.nin}
-            className="border p-2 rounded-md"
-            type="text"
-            placeholder="Enter your NIN"
+            value={formData.email}
+            className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+            type="email"
+            placeholder="Enter your email"
+            required
           />
         </div>
 
-        <div className="flex flex-col gap-1 relative">
-          <label>Password</label>
-          <input
-            name="password"
-            onChange={handleChange}
-            value={formData.password}
-            className="border p-2 rounded-md pr-10"
-            type={showPassword ? "text" : "password"}
-            placeholder="Enter your password"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-9 text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            {showPassword ? (
-              <FaEyeSlash className="w-5 h-5" />
-            ) : (
-              <FaEye className="w-5 h-5" />
-            )}
-          </button>
-        </div>
-
-        {formData.password && (
-          <div className="border p-3 rounded-md bg-gray-50">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold">Password Strength:</span>
-              <span
-                className={`text-sm font-bold ${
-                  passwordStrength.strength === "Strong"
-                    ? "text-green-600"
-                    : passwordStrength.strength === "Medium"
-                    ? "text-yellow-600"
-                    : "text-red-600"
-                }`}
+        <div className="flex gap-4">
+          <div className="flex flex-col gap-1 w-1/2">
+            <label>Passcode</label>
+            <div className="relative flex items-center w-full">
+              <input
+                name="passcode"
+                onChange={handleChange}
+                value={formData.passcode}
+                className="border p-2 rounded-md pr-10 focus:ring-2 focus:ring-blue-500 outline-none w-full"
+                type={showPasscode ? "text" : "password"}
+                placeholder="6 digits"
+                maxLength={6}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasscode(!showPasscode)}
+                className="absolute right-3 text-gray-500 hover:text-gray-700 transition-colors flex items-center justify-center h-full"
               >
-                {passwordStrength.strength}
-              </span>
-            </div>
-
-            <div className="space-y-1 text-xs">
-              <div className="flex items-center gap-2">
-                <span
-                  className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                    passwordStrength.hasMinLength
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-300"
-                  }`}
-                >
-                  {passwordStrength.hasMinLength && "✓"}
-                </span>
-                <span>At least 8 characters</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span
-                  className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                    passwordStrength.hasUpperCase
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-300"
-                  }`}
-                >
-                  {passwordStrength.hasUpperCase && "✓"}
-                </span>
-                <span>Uppercase letter (A-Z)</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span
-                  className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                    passwordStrength.hasLowerCase
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-300"
-                  }`}
-                >
-                  {passwordStrength.hasLowerCase && "✓"}
-                </span>
-                <span>Lowercase letter (a-z)</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span
-                  className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                    passwordStrength.hasNumbers
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-300"
-                  }`}
-                >
-                  {passwordStrength.hasNumbers && "✓"}
-                </span>
-                <span>Number (0-9)</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span
-                  className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                    passwordStrength.hasSpecialChars
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-300"
-                  }`}
-                >
-                  {passwordStrength.hasSpecialChars && "✓"}
-                </span>
-                <span>Special character (!@#$%^&* etc.)</span>
-              </div>
+                {showPasscode ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
+              </button>
             </div>
           </div>
-        )}
+
+          <div className="flex flex-col gap-1 w-1/2">
+            <label>Confirm Passcode</label>
+            <div className="relative flex items-center w-full">
+              <input
+                name="confirmPasscode"
+                onChange={handleChange}
+                value={formData.confirmPasscode}
+                className="border p-2 rounded-md pr-10 focus:ring-2 focus:ring-blue-500 outline-none w-full"
+                type={showConfirmPasscode ? "text" : "password"}
+                placeholder="6 digits"
+                maxLength={6}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPasscode(!showConfirmPasscode)}
+                className="absolute right-3 text-gray-500 hover:text-gray-700 transition-colors flex items-center justify-center h-full"
+              >
+                {showConfirmPasscode ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label>Referral Code <span className="text-gray-400 text-sm">(Optional)</span></label>
+          <input
+            name="referralCode"
+            onChange={handleChange}
+            value={formData.referralCode}
+            className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+            type="text"
+            placeholder="Enter referral code"
+          />
+        </div>
+
         <button
           disabled={loading}
-          className="bg-gray-800 text-white p-2 rounded-md flex items-center justify-center"
+          className="bg-gray-800 text-white p-2 rounded-md flex items-center justify-center hover:bg-gray-900 transition-colors mt-2"
         >
           {loading ? (
-            <svg
-              className="animate-spin h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
+            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
           ) : (
             "Sign up"
@@ -338,7 +209,7 @@ const page = () => {
         </button>
         <p className="text-sm text-center">
           Already have an account?{" "}
-          <Link className="text-blue-500" href={"/signin"}>
+          <Link className="text-blue-500 hover:text-blue-600 font-medium" href={"/signin"}>
             Sign in
           </Link>
         </p>

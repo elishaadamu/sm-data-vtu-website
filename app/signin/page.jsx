@@ -16,23 +16,23 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 const page = () => {
   const router = useRouter();
   const { fetchUserData } = useAppContext();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [passcode, setPasscode] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPasscode, setShowPasscode] = useState(false);
 
   const handleSignin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters long.");
+    if (!/^\d{6}$/.test(passcode)) {
+      toast.error("Passcode must be exactly 6 digits.");
       setLoading(false);
       return;
     }
 
-    const payload = { email, password };
-    console.log(payload);
+    const payload = { phone, passcode };
+    console.log("Login Payload:", payload);
     try {
       const response = await axios.post(
         apiUrl(API_CONFIG.ENDPOINTS.AUTH.SIGNIN),
@@ -88,42 +88,45 @@ const page = () => {
         <p className="text-center font-semibold text-xl">Welcome back!</p>
         <h2 className="text-left text-gray-500">Signin as a User</h2>
         <div className="flex flex-col gap-1">
-          <label>Email</label>
+          <label>Phone Number</label>
           <input
-            onChange={(e) => setEmail(e.target.value)}
-            value={email}
-            className="border p-2 rounded-md"
-            type="email"
-            placeholder="Enter your email"
+            onChange={(e) => setPhone(e.target.value)}
+            value={phone}
+            className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+            type="tel"
+            placeholder="Enter your phone number"
             required
           />
         </div>
-        <div className="flex flex-col gap-1 relative">
-          <label>Password</label>
-          <input
-            onChange={(e) => setPassword(e.target.value)}
-            value={password}
-            className="border p-2 rounded-md pr-10"
-            type={showPassword ? "text" : "password"}
-            placeholder="Enter your password"
-            required
-            autoComplete="current-password"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-9 text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            {showPassword ? (
-              <FaEyeSlash className="w-5 h-5" />
-            ) : (
-              <FaEye className="w-5 h-5" />
-            )}
-          </button>
+        <div className="flex flex-col gap-1">
+          <label>Passcode</label>
+          <div className="relative flex items-center w-full">
+            <input
+              onChange={(e) => setPasscode(e.target.value)}
+              value={passcode}
+              className="border p-2 rounded-md pr-10 focus:ring-2 focus:ring-blue-500 outline-none w-full"
+              type={showPasscode ? "text" : "password"}
+              placeholder="6 digits"
+              maxLength={6}
+              required
+              autoComplete="current-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPasscode(!showPasscode)}
+              className="absolute right-3 text-gray-500 hover:text-gray-700 transition-colors flex items-center justify-center h-full"
+            >
+              {showPasscode ? (
+                <FaEyeSlash className="w-5 h-5" />
+              ) : (
+                <FaEye className="w-5 h-5" />
+              )}
+            </button>
+          </div>
         </div>
         <button
           disabled={loading}
-          className="bg-gray-800 text-white p-2 rounded-md flex items-center justify-center"
+          className="bg-gray-800 hover:bg-gray-900 transition-colors text-white p-2 rounded-md flex items-center justify-center mt-2"
         >
           {loading ? (
             <svg
@@ -152,7 +155,7 @@ const page = () => {
         </button>
         <p className="text-sm text-center">
           Don't have an account?{" "}
-          <Link className="text-blue-500" href={"/signup"}>
+          <Link className="text-blue-500 hover:text-blue-600 font-medium" href={"/signup"}>
             Sign up
           </Link>
         </p>

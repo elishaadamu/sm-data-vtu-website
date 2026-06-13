@@ -23,6 +23,8 @@ export default function RootLayout({ children }) {
     pathname.startsWith("/bd-dashboard") ||
     pathname.startsWith("/signin-bdm") ||
     pathname.startsWith("/seller") ||
+    pathname.startsWith("/manager") ||
+    pathname.startsWith("/manager-login") ||
     pathname.startsWith("/vendor-dashboard");
 
   return (
