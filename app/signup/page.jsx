@@ -11,6 +11,7 @@ import { encryptData } from "@/lib/encryption";
 import { apiUrl, API_CONFIG } from "@/configs/api";
 import { useAppContext } from "@/context/AppContext";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import Swal from "sweetalert2";
 
 const page = () => {
   const router = useRouter();
@@ -19,13 +20,13 @@ const page = () => {
     fullName: "",
     phone: "",
     email: "",
-    passcode: "",
-    confirmPasscode: "",
+    password: "",
+    confirmPassword: "",
     referralCode: "",
   });
   const [loading, setLoading] = useState(false);
-  const [showPasscode, setShowPasscode] = useState(false);
-  const [showConfirmPasscode, setShowConfirmPasscode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,40 +37,65 @@ const page = () => {
     e.preventDefault();
     setLoading(true);
 
-    if (!/^\d{6}$/.test(formData.passcode)) {
-      toast.error("Passcode must be exactly 6 digits.");
+    if (formData.password.length < 8) {
+      toast.error("Password must be at least 8 characters long.");
       setLoading(false);
       return;
     }
 
-    if (formData.passcode !== formData.confirmPasscode) {
-      toast.error("Passcodes do not match.");
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match.");
       setLoading(false);
       return;
     }
 
-    // Exclude confirmPasscode and rename passcode to password for backend
-    const { confirmPasscode, passcode, ...rest } = formData;
-    const payload = { ...rest, password: passcode };
+    // Exclude confirmPassword from the payload sent to the backend
+    const { confirmPassword, ...payload } = formData;
     
     console.log("Signup payload:", payload);
 
     try {
-      const response = await axios.post(
+      // 1. Perform Signup
+      await axios.post(
         apiUrl(API_CONFIG.ENDPOINTS.AUTH.SIGNUP),
         payload
       );
-      const { user } = response.data;
 
-      // Encrypt and store user data
-      const encryptedUser = encryptData(user);
+      // 2. Automatically Perform Login
+      const loginPayload = {
+        phone: payload.phone,
+        password: payload.password,
+      };
+
+      const loginResponse = await axios.post(
+        apiUrl(API_CONFIG.ENDPOINTS.AUTH.SIGNIN),
+        loginPayload
+      );
+
+      if (!loginResponse.data) {
+        throw new Error("No data received from login server");
+      }
+
+      // 3. Encrypt and store user data exactly as login does
+      const encryptedUser = encryptData(loginResponse.data);
       localStorage.setItem("user", encryptedUser);
 
-      fetchUserData(); // Call fetchUserData to update global state
-      toast.success("Signup successful!", {
-        onClose: () => router.push("/"),
-        autoClose: 1500, // Optional: close toast faster than default
+      // 4. Update global state
+      fetchUserData(); 
+
+      // 5. Show custom alert and redirect to dashboard
+      Swal.fire({
+        title: "Account Created!",
+        text: "You have been successfully signed up and logged in.",
+        icon: "success",
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Go to Dashboard",
+        timer: 3000,
+        timerProgressBar: true,
+      }).then(() => {
+        router.push("/dashboard");
       });
+
     } catch (error) {
       console.error("Error signing up:", error);
       toast.error(
@@ -137,47 +163,45 @@ const page = () => {
 
         <div className="flex gap-4">
           <div className="flex flex-col gap-1 w-1/2">
-            <label>Passcode</label>
+            <label>Password</label>
             <div className="relative flex items-center w-full">
               <input
-                name="passcode"
+                name="password"
                 onChange={handleChange}
-                value={formData.passcode}
+                value={formData.password}
                 className="border p-2 rounded-md pr-10 focus:ring-2 focus:ring-blue-500 outline-none w-full"
-                type={showPasscode ? "text" : "password"}
-                placeholder="6 digits"
-                maxLength={6}
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
                 required
               />
               <button
                 type="button"
-                onClick={() => setShowPasscode(!showPasscode)}
+                onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 text-gray-500 hover:text-gray-700 transition-colors flex items-center justify-center h-full"
               >
-                {showPasscode ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
+                {showPassword ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
           <div className="flex flex-col gap-1 w-1/2">
-            <label>Confirm Passcode</label>
+            <label>Confirm Password</label>
             <div className="relative flex items-center w-full">
               <input
-                name="confirmPasscode"
+                name="confirmPassword"
                 onChange={handleChange}
-                value={formData.confirmPasscode}
+                value={formData.confirmPassword}
                 className="border p-2 rounded-md pr-10 focus:ring-2 focus:ring-blue-500 outline-none w-full"
-                type={showConfirmPasscode ? "text" : "password"}
-                placeholder="6 digits"
-                maxLength={6}
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm"
                 required
               />
               <button
                 type="button"
-                onClick={() => setShowConfirmPasscode(!showConfirmPasscode)}
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3 text-gray-500 hover:text-gray-700 transition-colors flex items-center justify-center h-full"
               >
-                {showConfirmPasscode ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
+                {showConfirmPassword ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
               </button>
             </div>
           </div>

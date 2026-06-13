@@ -17,21 +17,21 @@ const page = () => {
   const router = useRouter();
   const { fetchUserData } = useAppContext();
   const [phone, setPhone] = useState("");
-  const [passcode, setPasscode] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPasscode, setShowPasscode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSignin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    if (!/^\d{6}$/.test(passcode)) {
-      toast.error("Passcode must be exactly 6 digits.");
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters long.");
       setLoading(false);
       return;
     }
 
-    const payload = { phone, password: passcode };
+    const payload = { phone, password };
     console.log("Login Payload:", payload);
     try {
       const response = await axios.post(
@@ -99,24 +99,23 @@ const page = () => {
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label>Passcode</label>
+          <label>Password</label>
           <div className="relative flex items-center w-full">
             <input
-              onChange={(e) => setPasscode(e.target.value)}
-              value={passcode}
+              onChange={(e) => setPassword(e.target.value)}
+              value={password}
               className="border p-2 rounded-md pr-10 focus:ring-2 focus:ring-blue-500 outline-none w-full"
-              type={showPasscode ? "text" : "password"}
-              placeholder="6 digits"
-              maxLength={6}
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
               required
               autoComplete="current-password"
             />
             <button
               type="button"
-              onClick={() => setShowPasscode(!showPasscode)}
+              onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 text-gray-500 hover:text-gray-700 transition-colors flex items-center justify-center h-full"
             >
-              {showPasscode ? (
+              {showPassword ? (
                 <FaEyeSlash className="w-5 h-5" />
               ) : (
                 <FaEye className="w-5 h-5" />
