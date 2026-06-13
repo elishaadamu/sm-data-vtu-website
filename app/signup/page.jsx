@@ -48,8 +48,9 @@ const page = () => {
       return;
     }
 
-    // Exclude confirmPasscode from the payload sent to the backend
-    const { confirmPasscode, ...payload } = formData;
+    // Exclude confirmPasscode and rename passcode to password for backend
+    const { confirmPasscode, passcode, ...rest } = formData;
+    const payload = { ...rest, password: passcode };
     
     console.log("Signup payload:", payload);
 

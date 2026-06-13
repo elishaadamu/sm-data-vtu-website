@@ -31,7 +31,7 @@ const page = () => {
       return;
     }
 
-    const payload = { phone, passcode };
+    const payload = { phone, password: passcode };
     console.log("Login Payload:", payload);
     try {
       const response = await axios.post(
