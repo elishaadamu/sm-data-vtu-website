@@ -71,6 +71,9 @@ export const API_CONFIG = {
       CREATE: "/vtu/airtime",
       HISTORY: "/transactions/history/", // append userId
     },
+    ADMIN: {
+      DASHBOARD_STATS: "/admin/dashboard/stats/", // append {adminId}
+    },
   },
 };
 

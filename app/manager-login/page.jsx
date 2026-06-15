@@ -29,7 +29,7 @@ const ManagerLogin = () => {
         apiUrl(API_CONFIG.ENDPOINTS.AUTH.SIGNIN),
         payload
       );
-
+      console.log(response.data);
       if (!response.data) {
         throw new Error("No data received from server");
       }

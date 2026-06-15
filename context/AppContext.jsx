@@ -19,6 +19,7 @@ export const AppContextProvider = (props) => {
 
   const [products, setProducts] = useState([]);
   const [userData, setUserData] = useState(null);
+  const [managerData, setManagerData] = useState(null);
   const [isSeller, setIsSeller] = useState(true);
   const [authLoading, setAuthLoading] = useState(true);
   const isLoggedIn = !!userData; // Derive isLoggedIn from userData
@@ -66,6 +67,30 @@ export const AppContextProvider = (props) => {
       setUserData(null);
     } finally {
       setAuthLoading(false);
+    }
+  };
+
+  const fetchManagerData = async () => {
+    try {
+      const encryptedManager = localStorage.getItem("manager_user");
+
+      if (!encryptedManager) {
+        setManagerData(null);
+        return;
+      }
+
+      const decryptedManager = decryptData(encryptedManager);
+
+      if (decryptedManager) {
+        setManagerData(decryptedManager);
+      } else {
+        localStorage.removeItem("manager_user");
+        setManagerData(null);
+      }
+    } catch (error) {
+      console.error("Error in fetchManagerData:", error);
+      localStorage.removeItem("manager_user");
+      setManagerData(null);
     }
   };
 
@@ -171,6 +196,7 @@ export const AppContextProvider = (props) => {
 
   useEffect(() => {
     fetchUserData();
+    fetchManagerData();
   }, []);
 
   // Effect to load cart and wishlist based on userData
@@ -265,6 +291,8 @@ export const AppContextProvider = (props) => {
     setIsSeller,
     userData,
     fetchUserData,
+    managerData,
+    fetchManagerData,
     products,
     cartItems,
     setCartItems,

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { getAdminStats } from "@/lib/adminStore";
+import { fetchAdminStats, getAdminStats } from "@/lib/adminStore";
+import { useAppContext } from "@/context/AppContext";
 import { FaUsers, FaUserCheck, FaWallet, FaUserPlus } from "react-icons/fa";
 import { format, subDays } from "date-fns";
 
@@ -53,17 +54,40 @@ const CustomBarChart = ({ data, labels, title, prefix = "" }) => {
 };
 
 export default function ManagerDashboard() {
+  const { managerData } = useAppContext();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Small delay to simulate data loading and let animation play
+    const fetchStats = async () => {
+      try {
+        const adminId = managerData?._id || managerData?.id;
+        if (adminId) {
+          // Fetch from the real endpoint
+          const responsePayload = await fetchAdminStats(adminId);
+          // If the backend wraps the response in { success: true, data: {...} }, unwrap it
+          const actualStats = responsePayload?.data ? responsePayload.data : responsePayload;
+          setStats(actualStats);
+        } else {
+          // Fallback to mock data if no user ID
+          setStats(getAdminStats());
+        }
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+        // Fallback to mock data on error
+        setStats(getAdminStats());
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Add a small delay to allow animation to play
     const timer = setTimeout(() => {
-      setStats(getAdminStats());
-      setLoading(false);
+      fetchStats();
     }, 500);
+
     return () => clearTimeout(timer);
-  }, []);
+  }, [managerData]);
 
   if (loading || !stats) {
     return (
@@ -87,28 +111,28 @@ export default function ManagerDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
           title="Total Users" 
-          value={stats.totalUsers.toLocaleString()} 
+          value={(stats?.totalUsers || 0).toLocaleString()} 
           icon={FaUsers} 
           colorClass="text-blue-600" 
           bgClass="bg-blue-50" 
         />
         <StatCard 
           title="Active Users" 
-          value={stats.activeUsers.toLocaleString()} 
+          value={(stats?.activeUsers || 0).toLocaleString()} 
           icon={FaUserCheck} 
           colorClass="text-emerald-600" 
           bgClass="bg-emerald-50" 
         />
         <StatCard 
           title="Total Funds" 
-          value={`₦${stats.totalFunds.toLocaleString()}`} 
+          value={`₦${(stats?.totalFunds || 0).toLocaleString()}`} 
           icon={FaWallet} 
           colorClass="text-purple-600" 
           bgClass="bg-purple-50" 
         />
         <StatCard 
           title="New Users (Today)" 
-          value={stats.newUsersToday.toLocaleString()} 
+          value={(stats?.newUsersToday || 0).toLocaleString()} 
           icon={FaUserPlus} 
           colorClass="text-amber-600" 
           bgClass="bg-amber-50" 
@@ -118,13 +142,13 @@ export default function ManagerDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <CustomBarChart 
           title="Daily Revenue (Last 7 Days)" 
-          data={stats.dailySales} 
+          data={stats?.dailySales || []} 
           labels={dailyLabels} 
           prefix="₦"
         />
         <CustomBarChart 
           title="Weekly Revenue (Last 4 Weeks)" 
-          data={stats.weeklySales} 
+          data={stats?.weeklySales || []} 
           labels={weeklyLabels} 
           prefix="₦"
         />
