@@ -7,7 +7,7 @@ import withReactContent from "sweetalert2-react-content";
 
 const MySwal = withReactContent(Swal);
 import { useAppContext } from "@/context/AppContext";
-import { apiUrl, API_CONFIG, apiUrlData } from "@/configs/api";
+import { apiUrl, API_CONFIG } from "@/configs/api";
 import {
   FaWallet,
   FaMobileAlt,
@@ -19,12 +19,19 @@ import {
 } from "react-icons/fa";
 import { MdSignalCellularAlt } from "react-icons/md";
 
+const NETWORKS = [
+  { name: "MTN", identifier: "MTN" },
+  { name: "Airtel", identifier: "AIRTEL" },
+  { name: "9Mobile", identifier: "9MOBILE" },
+  { name: "Glo", identifier: "GLO" },
+];
+
 const DataPage = () => {
   const { userData } = useAppContext();
   const [walletBalance, setWalletBalance] = useState(0);
   const [walletLoading, setWalletLoading] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [networks, setNetworks] = useState([]);
+  const [networks, setNetworks] = useState(NETWORKS);
   const [networksLoading, setNetworksLoading] = useState(false);
   const [plans, setPlans] = useState([]);
   const [selectedNetwork, setSelectedNetwork] = useState("");
@@ -53,27 +60,6 @@ const DataPage = () => {
     fetchWalletBalance();
   }, [userData]);
 
-  // Fetch networks from external API on initial load
-  useEffect(() => {
-    const fetchNetworks = async () => {
-      setNetworksLoading(true);
-      try {
-        const response = await axios.get(
-          apiUrlData(API_CONFIG.ENDPOINTS.DATA.GET_ALL),
-        );
-       
-
-        if (response.data.networks && Array.isArray(response.data.networks)) {
-          setNetworks(response.data.networks);
-        }
-      } finally {
-        setNetworksLoading(false);
-      }
-    };
-
-    fetchNetworks();
-  }, []);
-
   // Fetch network-specific plans when network is selected
   useEffect(() => {
     if (!selectedNetwork) {
@@ -85,22 +71,31 @@ const DataPage = () => {
       setLoading(true);
       try {
         const response = await axios.get(
-          apiUrlData(
-            API_CONFIG.ENDPOINTS.DATA.GET_BY_NETWORK + "=" + selectedNetwork,
+          apiUrl(
+            API_CONFIG.ENDPOINTS.DATA.GET_BY_NETWORK + selectedNetwork,
           ),
         );
-
-        // API returns array of plans or { plans: [...] }
+        // Our database returns plans under response.data.data or response.data.plans
         const plansData = Array.isArray(response.data)
           ? response.data
-          : response.data.plans;
+          : response.data.data || response.data.plans || response.data.dataPlans || [];
 
         if (plansData && Array.isArray(plansData)) {
-          setPlans(plansData);
+          const formattedPlans = plansData
+            .filter((p) => p.isActive !== false)
+            .map((p) => ({
+              ...p,
+              plan_code: p.planId || p.plan_code || "",
+              label: p.planName || p.label || "Data Plan",
+              amount: p.price ?? p.amount ?? 0,
+              validity: p.validity || "30",
+            }));
+          setPlans(formattedPlans);
         } else {
           setPlans([]);
         }
       } catch (error) {
+        console.error("Error fetching plans:", error);
         setPlans([]);
       } finally {
         setLoading(false);
