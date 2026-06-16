@@ -60,10 +60,18 @@ export const API_CONFIG = {
       PRICES: "/transactions/prices",
     },
     DATA: {
-      GET_ALL: "/networks/",
-      GET_BY_NETWORK: "/plans/?network", // append /{network}
+      GET_ALL: "/data-plan",
+      GET_BY_NETWORK: "/data-plan/network/", // append {network}
+      GET_BY_PLAN_ID: "/data-plan/", // append {planId}
+      CREATE_PLAN: "/data-plan/", // append {adminUserId}
+      UPDATE_PLAN: "/data-plan/", // append {planId}/{adminUserId}
+      DELETE_PLAN: "/data-plan/", // append {planId}/{adminUserId}
+      TOGGLE_PLAN_STATUS: "/data-plan/", // append {planId}/toggle-status/{adminUserId}
       CREATE: "/vtu/data",
       HISTORY: "/transactions/history/", // append userId
+    },
+    TRANSACTIONS: {
+      HISTORY: "/transactions/history/", // append {userId}
     },
     AIRTIME: {
       GET_ALL: "/airtime-plan",
@@ -72,7 +80,17 @@ export const API_CONFIG = {
       HISTORY: "/transactions/history/", // append userId
     },
     ADMIN: {
-      DASHBOARD_STATS: "/admin/dashboard/stats/", // append {adminId}
+      DASHBOARD_STATS: "/admin/dashboard/stats/",        // append {adminId}
+      DASHBOARD_DAILY: "/admin/dashboard/daily/",        // append {adminId}
+      DASHBOARD_WEEKLY: "/admin/dashboard/weekly/",      // append {adminId}
+      USERS: "/admin/users/",                            // append {adminUserId}
+      USER_STATS: "/admin/users/",                       // append {userId}/stats/{adminUserId}
+      UPDATE_USER: "/admin/updateUser/",                 // append {adminUserId}, PUT
+      DELETE_USER: "/admin/deleteUser/",                 // append {adminUserId}, DELETE
+      ADD_BALANCE: "/admin/addBalance/",                 // append {adminUserId}, POST
+      DEBIT_BALANCE: "/admin/debitBalance/",             // append {adminUserId}, POST
+      UPGRADE_USER: "/admin/upgradeuser/",               // append {adminUserId}, POST (super admin only)
+      DOWNGRADE_USER: "/admin/downgradeuser/",           // append {adminUserId}, POST (super admin only)
     },
   },
 };
