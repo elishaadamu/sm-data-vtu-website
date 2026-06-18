@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Logo from "@/assets/logo/sm-data.png";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useAppContext } from "@/context/AppContext";
 import {
   FaHome,
   FaUsers,
@@ -23,6 +24,7 @@ const ManagerLayout = ({ children }) => {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const { managerData } = useAppContext();
 
   useEffect(() => {
     setIsClient(true);
@@ -135,20 +137,43 @@ const ManagerLayout = ({ children }) => {
               </button>
               <h1 className="font-bold text-slate-800">Admin Panel</h1>
             </div>
-            <Image className="w-10 h-10 object-contain" src={Logo} alt="Logo" />
+            <div className="flex items-center gap-2">
+              <Image className="w-8 h-8 object-contain" src={Logo} alt="Logo" />
+              <button
+                onClick={handleLogout}
+                className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                title="Logout"
+              >
+                <FaSignOutAlt className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </header>
 
         {/* Desktop Header */}
         <header className="hidden lg:flex bg-white/80 backdrop-blur-md border-b border-slate-200 p-4 sticky top-0 z-10 justify-end items-center px-8">
-           <div className="flex items-center gap-3">
-             <div className="text-right">
-                <p className="text-sm font-bold text-slate-800">System Admin</p>
-                <p className="text-xs text-slate-500">admin@smdata.com</p>
+           <div className="flex items-center gap-6">
+             <div className="flex items-center gap-3">
+               <div className="text-right">
+                  <p className="text-sm font-bold text-slate-800">
+                    {managerData?.name || managerData?.username || "System Admin"}
+                  </p>
+                  {managerData?.email && (
+                    <p className="text-xs text-slate-500">{managerData.email}</p>
+                  )}
+               </div>
+               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold uppercase">
+                 {(managerData?.name?.[0] || managerData?.username?.[0] || "A").toUpperCase()}
+               </div>
              </div>
-             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
-               A
-             </div>
+             <div className="h-8 w-px bg-slate-200"></div>
+             <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors border border-red-200"
+              >
+                <FaSignOutAlt className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
            </div>
         </header>
 
