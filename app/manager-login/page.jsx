@@ -37,7 +37,7 @@ const ManagerLogin = () => {
       const userData = response.data;
 
       // Ensure that only admins or managers can login here
-      if (userData.role !== "admin" && userData.role !== "manager") {
+      if (userData.role !== "admin" && userData.role !== "manager" && userData.role !== "super-admin") {
         setLoading(false);
         Swal.fire({
           title: "Access Denied",
