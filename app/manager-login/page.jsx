@@ -11,9 +11,11 @@ import { FaEye, FaEyeSlash, FaShieldAlt } from "react-icons/fa";
 import axios from "axios";
 import { apiUrl, API_CONFIG } from "@/configs/api";
 import Swal from "sweetalert2";
+import { useAppContext } from "@/context/AppContext";
 
 const ManagerLogin = () => {
   const router = useRouter();
+  const { fetchManagerData } = useAppContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -59,6 +61,7 @@ const ManagerLogin = () => {
       // Valid admin -> Encrypt and save session
       const encryptedAdmin = encryptData(userData);
       localStorage.setItem("manager_user", encryptedAdmin);
+      fetchManagerData();
       toast.success(`Welcome back, ${userData.firstName || userData.fullName || 'Administrator'}!`);
       
       router.push("/manager");

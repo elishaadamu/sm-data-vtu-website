@@ -380,13 +380,15 @@ export default function ManagerDashboard() {
           setDailyData(dailyRes);
           setWeeklyData(weeklyRes);
         } else {
-          const fallback = getAdminStats();
-          setStats(fallback);
-          setDailyData(fallback.dailySales || []);
-          setWeeklyData(fallback.weeklySales || []);
+          const hasLocalUser = typeof window !== "undefined" && localStorage.getItem("manager_user");
+          if (!hasLocalUser) {
+            const fallback = getAdminStats();
+            setStats(fallback);
+            setDailyData(fallback.dailySales || []);
+            setWeeklyData(fallback.weeklySales || []);
+          }
         }
       } catch (error) {
-        
         const fallback = getAdminStats();
         
         setStats(fallback);
