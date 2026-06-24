@@ -280,17 +280,20 @@ export default function ManageUsers() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-visible">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-600">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-semibold">
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden w-full max-w-full">
+        <div 
+          className="overflow-x-auto overflow-y-auto max-h-[500px] w-full"
+          onScroll={() => setActionMenuOpen(null)}
+        >
+          <table className="w-full text-left text-sm text-slate-600 border-collapse whitespace-nowrap">
+            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-semibold sticky top-0 z-10">
               <tr>
-                <th className="px-6 py-4">S/N</th>
-                <th className="px-6 py-4">Full Name</th>
-                <th className="px-6 py-4">Phone</th>
-                <th className="px-6 py-4">Email</th>
-                <th className="px-6 py-4">Wallet Balance</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+                <th className="px-6 py-4 bg-slate-50">S/N</th>
+                <th className="px-6 py-4 bg-slate-50">Full Name</th>
+                <th className="px-6 py-4 bg-slate-50">Phone</th>
+                <th className="px-6 py-4 bg-slate-50">Email</th>
+                <th className="px-6 py-4 bg-slate-50">Wallet Balance</th>
+                <th className="px-6 py-4 text-right bg-slate-50">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -527,23 +530,23 @@ export default function ManageUsers() {
       {actionMenuOpen && (
         <div className="action-menu-wrapper">
           <div
-            className="fixed z-[100] w-40 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden"
+            className="fixed z-[100] w-40 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden py-1"
             style={{
               left: `${actionMenuPos.x - 160}px`,
-              top: `${actionMenuPos.y + 8}px`,
+              top: `${actionMenuPos.y - 10}px`,
             }}
           >
             {(() => {
               const user = users.find((u) => (u._id || u.id) === actionMenuOpen);
               if (!user) return null;
               return (
-                <>
+                <div className="flex flex-col gap-1 px-1">
                   <button
                     onClick={() => {
                       setActionMenuOpen(null);
                       openStats(user);
                     }}
-                    className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+                    className="w-full text-left px-3 py-1.5 text-xs font-medium rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
                   >
                     Stats
                   </button>
@@ -552,7 +555,7 @@ export default function ManageUsers() {
                       setActionMenuOpen(null);
                       openEdit(user);
                     }}
-                    className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+                    className="w-full text-left px-3 py-1.5 text-xs font-medium rounded-md bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors"
                   >
                     Edit
                   </button>
@@ -561,7 +564,7 @@ export default function ManageUsers() {
                       setActionMenuOpen(null);
                       openDebit(user);
                     }}
-                    className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+                    className="w-full text-left px-3 py-1.5 text-xs font-medium rounded-md bg-orange-50 text-orange-700 hover:bg-orange-100 transition-colors"
                   >
                     Debit
                   </button>
@@ -570,7 +573,7 @@ export default function ManageUsers() {
                       setActionMenuOpen(null);
                       openFund(user);
                     }}
-                    className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"
+                    className="w-full text-left px-3 py-1.5 text-xs font-medium rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
                   >
                     Fund
                   </button>
@@ -580,7 +583,7 @@ export default function ManageUsers() {
                         setActionMenuOpen(null);
                         handleUpgrade(user);
                       }}
-                      className="w-full text-left px-4 py-3 text-sm text-green-600 hover:bg-green-50"
+                      className="w-full text-left px-3 py-1.5 text-xs font-medium rounded-md bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
                     >
                       Upgrade to Admin
                     </button>
@@ -591,7 +594,7 @@ export default function ManageUsers() {
                         setActionMenuOpen(null);
                         handleDowngrade(user);
                       }}
-                      className="w-full text-left px-4 py-3 text-sm text-amber-600 hover:bg-amber-50"
+                      className="w-full text-left px-3 py-1.5 text-xs font-medium rounded-md bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
                     >
                       Downgrade to User
                     </button>
@@ -601,11 +604,11 @@ export default function ManageUsers() {
                       setActionMenuOpen(null);
                       handleDelete(user);
                     }}
-                    className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50"
+                    className="w-full text-left px-3 py-1.5 text-xs font-medium rounded-md bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
                   >
                     Delete
                   </button>
-                </>
+                </div>
               );
             })()}
           </div>

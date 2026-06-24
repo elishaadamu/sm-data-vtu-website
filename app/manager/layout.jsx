@@ -124,7 +124,7 @@ const ManagerLayout = ({ children }) => {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 lg:pl-72 flex flex-col min-h-screen">
+      <div className="flex-1 lg:pl-72 flex flex-col min-h-screen overflow-hidden">
         {/* Mobile Header */}
         <header className="bg-white border-b border-slate-200 lg:hidden sticky top-0 z-10">
           <div className="flex justify-between items-center p-4">
@@ -177,8 +177,8 @@ const ManagerLayout = ({ children }) => {
            </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-8">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 p-4 lg:p-8 min-w-0">
+          <div className="max-w-7xl mx-auto overflow-hidden">
             {children}
           </div>
         </main>
