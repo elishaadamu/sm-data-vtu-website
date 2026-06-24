@@ -150,10 +150,8 @@ const ServicesLayout = () => {
           ),
         );
         console.log("Wallet Balance Response:", response.data);
-        setWalletBalance(response.data?.wallet?.balance || 0);
-        setAccountDetails(
-          response.data?.account || response.data?.wallet?.balance || response.data?.success,
-        );
+        setWalletBalance(response.data?.wallet?.balance ?? 0);
+        setAccountDetails(response.data?.account || null);
       } catch (error) {
         console.error("Error fetching wallet balance:", error);
         setWalletBalance(0);
@@ -309,17 +307,17 @@ const ServicesLayout = () => {
           </div> */}
 
           {/* Wallet Carousel Section */}
-          {accountDetails?.virtualAccountNumber ? (
-            <div className="mb-6 lg:mb-8">
-              <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-2xl shadow-lg p-5 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-full opacity-20 -mr-16 -mt-16"></div>
+          <div className="mb-6 lg:mb-8">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-2xl shadow-lg p-6 relative overflow-hidden flex flex-col gap-4">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-full opacity-20 -mr-16 -mt-16 pointer-events-none"></div>
 
-                <div className="relative z-10 flex items-center gap-4">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative z-10">
+                <div className="flex items-center gap-4">
                   <div className="bg-white/20 p-3 rounded-xl hidden sm:block">
                     <FaWallet className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-blue-100 text-sm mb-1">Current Balance</p>
+                    <p className="text-blue-100 text-sm mb-1 font-medium">Wallet balance</p>
                     <h3 className="text-2xl lg:text-3xl font-bold text-white">
                       ₦
                       {walletBalance?.toLocaleString(undefined, {
@@ -329,43 +327,19 @@ const ServicesLayout = () => {
                     </h3>
                   </div>
                 </div>
-                
-                <div className="relative z-10 bg-white/10 backdrop-blur-sm rounded-xl p-3 md:text-right w-full md:w-auto flex flex-col md:items-end">
-                  <p className="text-blue-100 text-xs mb-1">Virtual Account</p>
+
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 md:text-right w-full md:w-auto flex flex-col md:items-end border border-white/10">
+                  <p className="text-blue-100 text-xs mb-1 font-medium">Virtual Account</p>
                   <p className="text-white font-semibold text-lg font-mono tracking-wider">
-                    {accountDetails?.virtualAccountNumber || "N/A"}
+                    {accountDetails?.virtualAccountNumber || "---"}
                   </p>
                   <p className="text-white/90 text-sm mt-1">
-                    {accountDetails?.virtualBanktName || "N/A"}
+                    {accountDetails?.virtualBanktName || accountDetails?.virtualBankName || "--- bank"}
                   </p>
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="mb-10 lg:mb-14">
-              <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-3xl shadow-lg p-6 lg:p-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500 rounded-full opacity-20 -mr-20 -mt-20"></div>
-
-                <div className="relative z-10 text-center py-8">
-                  <FaCreditCard className="w-16 h-16 text-white/60 mx-auto mb-4" />
-                  <h3 className="font-bold text-white mb-2 text-lg">
-                    No Virtual Account Yet
-                  </h3>
-                  <p className="text-blue-100 text-sm mb-6 max-w-sm mx-auto">
-                    Create a virtual account to easily receive payments and
-                    manage your funds
-                  </p>
-                  <button
-                    onClick={() => setShowCreateAccount(true)}
-                    className="bg-white text-blue-600 px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-50 transition inline-flex items-center gap-2"
-                  >
-                    <FaPlus className="w-4 h-4" />
-                    Create Account
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
 
           {/* Stats Cards - Total Fund and Total Spent
         <div className="grid grid-cols-2 gap-4 mb-10 lg:mb-14">
