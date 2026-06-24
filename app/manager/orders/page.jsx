@@ -51,18 +51,14 @@ export default function OrderHistory() {
   }, [loadUsers]);
 
   useEffect(() => {
-    if (!selectedUserId) {
-      setTransactions([]);
-      return;
-    }
+    if (!adminId) return;
 
     const loadHistory = async () => {
       setHistoryLoading(true);
       try {
-        const response = await axios.get(
-          apiUrl(`${API_CONFIG.ENDPOINTS.TRANSACTIONS.HISTORY}${selectedUserId}`),
-        );
-        setTransactions(unwrapList(response.data, ["transactions", "history"]));
+        const response = await axios.get(apiUrl(`/admin/transactions/${adminId}`));
+        console.log("Admin Transactions API Response:", response.data);
+        setTransactions(unwrapList(response.data, ["transactions", "history", "data"]));
       } catch (error) {
         console.error("Error loading transaction history:", error);
         setTransactions([]);
@@ -73,9 +69,8 @@ export default function OrderHistory() {
     };
 
     loadHistory();
-  }, [selectedUserId]);
+  }, [adminId]);
 
-  const selectedUser = users.find((user) => (user._id || user.id) === selectedUserId);
 
   const filteredOrders = useMemo(() => {
     const q = searchTerm.toLowerCase();
@@ -101,28 +96,10 @@ export default function OrderHistory() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Order History</h1>
-          <p className="text-slate-500 mt-1">Select a user to review their data and service purchases.</p>
+          <p className="text-slate-500 mt-1">Review all data and service purchases across the platform.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative w-full sm:w-72">
-            <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <select
-              value={selectedUserId}
-              onChange={(e) => setSelectedUserId(e.target.value)}
-              disabled={usersLoading}
-              className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-white appearance-none"
-            >
-              <option value="">{usersLoading ? "Loading users..." : "Select user"}</option>
-              {users.map((user) => {
-                const userId = user._id || user.id;
-                return (
-                  <option key={userId} value={userId}>
-                    {user.fullName || user.name || user.phone || user.email || userId}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
+
           <div className="relative w-full sm:w-64">
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -155,9 +132,7 @@ export default function OrderHistory() {
             <FaHistory className="text-slate-500" />
             <h2 className="font-bold text-slate-800">Recent Orders</h2>
           </div>
-          {selectedUser && (
-            <span className="text-sm text-slate-500">{selectedUser.phone || selectedUser.email}</span>
-          )}
+
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-600 whitespace-nowrap">
@@ -175,12 +150,10 @@ export default function OrderHistory() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {!selectedUserId || historyLoading || filteredOrders.length === 0 ? (
+              {historyLoading || filteredOrders.length === 0 ? (
                 <tr>
                   <td colSpan="9" className="px-6 py-8 text-center text-slate-400">
-                    {!selectedUserId
-                      ? "Select a user to load order history."
-                      : historyLoading
+                    {historyLoading
                         ? "Loading order history..."
                         : "No order transactions found."}
                   </td>
