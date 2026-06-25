@@ -95,7 +95,6 @@ const DataPage = () => {
           setPlans([]);
         }
       } catch (error) {
-        console.error("Error fetching plans:", error);
         setPlans([]);
       } finally {
         setLoading(false);
@@ -125,14 +124,23 @@ const DataPage = () => {
       return;
     }
 
+    const getNetworkNumber = (net) => {
+      switch (net?.toUpperCase()) {
+        case "MTN": return "1";
+        case "GLO": return "2";
+        case "9MOBILE": return "3";
+        case "AIRTEL": return "4";
+        default: return net;
+      }
+    };
+
     const payload = {
-      network: selectedNetwork,
+      network: getNetworkNumber(selectedNetwork),
       phone: phoneNumber,
-      plan_code: selectedPlanId,
+      PlanId: selectedPlanId,
       userId,
       amount: selectedPlan.amount,
     };
-
     try {
       setLoading(true);
       const response = await axios.post(
@@ -145,10 +153,7 @@ const DataPage = () => {
         title: "Transaction Successful",
         html: (
           <div className="text-left">
-            <div className="flex justify-between items-center border-b pb-2 mb-2">
-              <span className="font-semibold text-gray-600">Status:</span>
-              <span className="font-bold text-green-600">{transactionData.status}</span>
-            </div>
+
             <div className="flex justify-between items-center border-b pb-2 mb-2">
               <span className="font-semibold text-gray-600">Network:</span>
               <span className="font-bold">{transactionData.network}</span>
@@ -163,7 +168,7 @@ const DataPage = () => {
             </div>
              <div className="flex justify-between items-center border-b pb-2 mb-2">
               <span className="font-semibold text-gray-600">Amount:</span>
-              <span className="font-bold">₦{transactionData.amount}</span>
+              <span className="font-bold">₦{transactionData?.amount || payload.amount}</span>
             </div>
             <div className="mt-4 text-center">
               <p className="text-gray-600">{transactionData.message}</p>
