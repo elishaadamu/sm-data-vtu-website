@@ -60,6 +60,7 @@ const AirtimePage = () => {
       phone: phoneNumber,
       userId,
     };
+    console.log(payload);
     try {
       setLoading(true);
       const response = await axios.post(
@@ -121,10 +122,10 @@ const AirtimePage = () => {
   };
 
   const networks = [
-    { id: "mtn", name: "MTN" },
-    { id: "glo", name: "Glo" },
-    { id: "airtel", name: "Airtel" },
-    { id: "9mobile", name: "9mobile" },
+    { id: "1", name: "MTN" },
+    { id: "2", name: "Glo" },
+    { id: "4", name: "Airtel" },
+    { id: "3", name: "9mobile" },
   ];
 
   return (
