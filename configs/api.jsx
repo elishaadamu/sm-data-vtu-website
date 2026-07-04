@@ -11,6 +11,7 @@ export const API_CONFIG = {
 
     ACCOUNT: {
       CREATE: "/account/create/",
+      CREATE_VIRTUAL: "/wallet/topup/initiate/",
       GET: "/account/",
       walletBalance: "/wallet/",
       allWalletTransactions: "/wallet/",

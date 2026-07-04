@@ -35,7 +35,7 @@ const ServicesLayout = () => {
   const [transactionsLoading, setTransactionsLoading] = useState(false);
   const [getCount, setgetCount] = useState(0);
   const [showCreateAccount, setShowCreateAccount] = useState(false);
-  const [nin, setNin] = useState("");
+  const [bvn, setBvn] = useState("");
   const [accountDetails, setAccountDetails] = useState(null);
   const [fundingsCount, setFundingsCount] = useState(0);
 
@@ -237,8 +237,8 @@ const ServicesLayout = () => {
   // Handle Create Account
   const handleCreateAccount = async (e) => {
     e.preventDefault();
-    if (!nin.trim()) {
-      toast.error("Please enter your NIN");
+    if (!bvn.trim()) {
+      toast.error("Please enter your BVN");
       return;
     }
 
@@ -249,21 +249,22 @@ const ServicesLayout = () => {
     }
 
     setLoading(true);
-    const payload = { nin };
+    const payload = { number: bvn };
 
     try {
       const response = await axios.post(
-        apiUrl(API_CONFIG.ENDPOINTS.ACCOUNT.CREATE + userId),
+        apiUrl(API_CONFIG.ENDPOINTS.ACCOUNT.CREATE_VIRTUAL + userId),
         payload,
       );
       console.log("Account created:", response.data);
-      toast.success("Account created successfully!");
+      toast.success("Virtual account created successfully!");
       setShowCreateAccount(false);
-      setNin("");
-      setAccountDetails(response.data?.wallet);
+      setBvn("");
+      const details = response.data?.data || response.data?.account || response.data?.wallet;
+      setAccountDetails(details);
     } catch (error) {
       console.error("Error creating account:", error);
-      toast.error(error.response?.data?.message || "Failed to create account.");
+      toast.error(error.response?.data?.message || "Failed to create virtual account.");
     } finally {
       setLoading(false);
     }
@@ -328,14 +329,25 @@ const ServicesLayout = () => {
                   </div>
                 </div>
 
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 md:text-right w-full md:w-auto flex flex-col md:items-end border border-white/10">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 md:text-right w-full md:w-auto flex flex-col md:items-end border border-white/10 min-h-[82px] justify-center">
                   <p className="text-blue-100 text-xs mb-1 font-medium">Virtual Account</p>
-                  <p className="text-white font-semibold text-lg font-mono tracking-wider">
-                    {accountDetails?.virtualAccountNumber || "---"}
-                  </p>
-                  <p className="text-white/90 text-sm mt-1">
-                    {accountDetails?.virtualBanktName || accountDetails?.virtualBankName || "--- bank"}
-                  </p>
+                  {accountDetails?.virtualAccountNumber ? (
+                    <>
+                      <p className="text-white font-semibold text-lg font-mono tracking-wider">
+                        {accountDetails.virtualAccountNumber}
+                      </p>
+                      <p className="text-white/90 text-sm mt-1">
+                        {accountDetails.virtualBanktName || accountDetails.virtualBankName}
+                      </p>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => setShowCreateAccount(true)}
+                      className="mt-1 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-md hover:shadow-lg transition duration-200 active:scale-95"
+                    >
+                      Create Virtual Account
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -638,20 +650,20 @@ const ServicesLayout = () => {
               Create Virtual Account
             </h3>
             <p className="text-gray-600 text-sm mb-6">
-              Enter your NIN to create a virtual account and start receiving
+              Enter your Bank Verification Number (BVN) to create a virtual account and start receiving
               payments.
             </p>
 
             <form onSubmit={handleCreateAccount} className="space-y-4">
               <div className="flex flex-col gap-2">
                 <label className="text-gray-700 font-medium text-sm">
-                  National Identification Number (NIN)
+                  Bank Verification Number (BVN)
                 </label>
                 <input
                   type="text"
-                  value={nin}
-                  onChange={(e) => setNin(e.target.value)}
-                  placeholder="Enter your 11-digit NIN"
+                  value={bvn}
+                  onChange={(e) => setBvn(e.target.value)}
+                  placeholder="Enter your 11-digit BVN"
                   maxLength="11"
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
@@ -661,7 +673,7 @@ const ServicesLayout = () => {
               <div className="flex gap-3 pt-2">
                 <button
                   type="submit"
-                  disabled={loading || !nin.trim()}
+                  disabled={loading || !bvn.trim()}
                   className="flex-1 bg-blue-600 text-white font-semibold py-2.5 rounded-lg text-sm hover:bg-blue-700 transition disabled:bg-blue-300 disabled:cursor-not-allowed"
                 >
                   {loading ? "Creating..." : "Create Account"}
@@ -670,7 +682,7 @@ const ServicesLayout = () => {
                   type="button"
                   onClick={() => {
                     setShowCreateAccount(false);
-                    setNin("");
+                    setBvn("");
                   }}
                   className="flex-1 bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-lg text-sm hover:bg-gray-300 transition"
                 >
