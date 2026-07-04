@@ -151,7 +151,7 @@ const ServicesLayout = () => {
         );
         console.log("Wallet Balance Response:", response.data);
         setWalletBalance(response.data?.wallet?.balance ?? 0);
-        setAccountDetails(response.data?.account || null);
+        setAccountDetails(response.data?.wallet || null);
       } catch (error) {
         console.error("Error fetching wallet balance:", error);
         setWalletBalance(0);
@@ -331,13 +331,13 @@ const ServicesLayout = () => {
 
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 md:text-right w-full md:w-auto flex flex-col md:items-end border border-white/10 min-h-[82px] justify-center">
                   <p className="text-blue-100 text-xs mb-1 font-medium">Virtual Account</p>
-                  {accountDetails?.virtualAccountNumber ? (
+                  {accountDetails?.accountNumber ? (
                     <>
                       <p className="text-white font-semibold text-lg font-mono tracking-wider">
-                        {accountDetails.virtualAccountNumber}
+                        {accountDetails.accountNumber}
                       </p>
-                      <p className="text-white/90 text-sm mt-1">
-                        {accountDetails.virtualBanktName || accountDetails.virtualBankName}
+                      <p className="text-white/90 text-xs mt-0.5">
+                        {accountDetails.bankName} • {accountDetails.accountName}
                       </p>
                     </>
                   ) : (
