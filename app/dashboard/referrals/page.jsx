@@ -203,7 +203,7 @@ const ReferralsPage = () => {
           Referral Commission Matrix
         </h3>
         <p className="text-sm text-slate-600 leading-relaxed mb-5">
-          For every friend you refer to SM DATA, you get a percentage commission on all of their transactions during their first 50 days of membership.
+          For every friend you refer to SM DATA, you get a flat commission on all of their transactions during their first 50 days of membership.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -211,7 +211,7 @@ const ReferralsPage = () => {
             <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-sm shrink-0">1</div>
             <div>
               <h4 className="font-bold text-slate-800 text-sm">Wallet Funding</h4>
-              <p className="text-xs text-slate-500 mt-1">Earn 0.5% commission on all their wallet deposits.</p>
+              <p className="text-xs text-slate-500 mt-1">Earn ₦5 commission on all their wallet deposits. (Note: Funding charges are processed on the backend and do not affect the commission amount)</p>
             </div>
           </div>
 
@@ -219,7 +219,7 @@ const ReferralsPage = () => {
             <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-sm shrink-0">2</div>
             <div>
               <h4 className="font-bold text-slate-800 text-sm">Airtime Purchase</h4>
-              <p className="text-xs text-slate-500 mt-1">Earn 1.0% commission on every airtime transaction.</p>
+              <p className="text-xs text-slate-500 mt-1">Earn ₦1 commission on every airtime transaction.</p>
             </div>
           </div>
 
@@ -227,7 +227,7 @@ const ReferralsPage = () => {
             <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-sm shrink-0">3</div>
             <div>
               <h4 className="font-bold text-slate-800 text-sm">Data Subscription</h4>
-              <p className="text-xs text-slate-500 mt-1">Earn up to 2.0% commission on every data plan they buy.</p>
+              <p className="text-xs text-slate-500 mt-1">Earn ₦5 commission on every data plan they buy.</p>
             </div>
           </div>
         </div>

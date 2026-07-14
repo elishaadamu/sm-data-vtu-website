@@ -80,6 +80,9 @@ export const API_CONFIG = {
       CREATE: "/vtu/airtime",
       HISTORY: "/transactions/history/", // append userId
     },
+    NOTIFICATIONS: {
+      GET: "/notifications/",                            // append {userId}
+    },
     ADMIN: {
       DASHBOARD_STATS: "/admin/dashboard/stats/",        // append {adminId}
       DASHBOARD_DAILY: "/admin/dashboard/daily/",        // append {adminId}
@@ -92,6 +95,7 @@ export const API_CONFIG = {
       DEBIT_BALANCE: "/admin/debitBalance/",             // append {adminUserId}, POST
       UPGRADE_USER: "/admin/upgradeuser/",               // append {adminUserId}, POST (super admin only)
       DOWNGRADE_USER: "/admin/downgradeuser/",           // append {adminUserId}, POST (super admin only)
+      SEND_NOTIFICATION: "/notifications/send/",         // append {adminUserId}, POST
     },
   },
 };

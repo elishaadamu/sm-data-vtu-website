@@ -27,17 +27,17 @@ import { toast } from "react-toastify";
 // ─── Stat Pill ─────────────────────────────────────────────────────────────
 const StatPill = ({ label, value, color }) => (
   <div className={`flex flex-col items-center justify-center p-4 rounded-xl ${color} text-center`}>
-    <p className="text-xs font-semibold uppercase tracking-wide opacity-70">{label}</p>
-    <p className="text-xl font-black mt-1">{value}</p>
+    <p className="text-xs uppercase tracking-wide opacity-70 font-medium">{label}</p>
+    <p className="text-lg mt-1 font-semibold">{value}</p>
   </div>
 );
 
 // ─── Modal Wrapper ─────────────────────────────────────────────────────────
 const Modal = ({ title, onClose, children }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-100">
       <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-        <h3 className="text-lg font-bold text-slate-800">{title}</h3>
+        <h3 className="text-base font-semibold text-slate-800">{title}</h3>
         <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
           <FaTimes className="w-5 h-5" />
         </button>
@@ -56,6 +56,10 @@ export default function ManageUsers() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Modal states
   const [fundModal, setFundModal] = useState(null);    // user object
@@ -90,6 +94,11 @@ export default function ManageUsers() {
     loadUsers();
   }, [loadUsers]);
 
+  // Reset pagination on search
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (event.target.closest(".action-menu-wrapper")) return;
@@ -101,7 +110,7 @@ export default function ManageUsers() {
 
   const isSuperAdmin = managerData?.role === "super" || managerData?.isSuperAdmin;
 
-  // ─── Filter ───────────────────────────────────────────────────────────────
+  // ─── Filter & Pagination ──────────────────────────────────────────────────
   const filteredUsers = users.filter((u) => {
     const q = searchTerm.toLowerCase();
     return (
@@ -110,6 +119,11 @@ export default function ManageUsers() {
       (u.phone || "").includes(q)
     );
   });
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
 
   // ─── View Stats ───────────────────────────────────────────────────────────
   const openStats = async (user) => {
@@ -262,8 +276,8 @@ export default function ManageUsers() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Manage Users</h1>
-          <p className="text-slate-500 mt-1">
+          <h1 className="text-xl font-semibold text-slate-900">Manage Users</h1>
+          <p className="text-slate-500 mt-1 text-sm font-normal">
             {loading ? "Loading..." : `${users.length} user${users.length !== 1 ? "s" : ""} registered`}
           </p>
         </div>
@@ -274,33 +288,33 @@ export default function ManageUsers() {
             placeholder="Search name, phone, email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-white"
+            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-white font-normal text-sm"
           />
         </div>
       </div>
 
-      {/* Table */}
+      {/* Table & Pagination Wrapper */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden w-full max-w-full">
         <div 
-          className="overflow-x-auto overflow-y-auto max-h-[500px] w-full"
+          className="overflow-x-auto w-full"
           onScroll={() => setActionMenuOpen(null)}
         >
           <table className="w-full text-left text-sm text-slate-600 border-collapse whitespace-nowrap">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-semibold sticky top-0 z-10">
+            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-medium text-xs">
               <tr>
-                <th className="px-6 py-4 bg-slate-50">S/N</th>
-                <th className="px-6 py-4 bg-slate-50">Full Name</th>
-                <th className="px-6 py-4 bg-slate-50">Phone</th>
-                <th className="px-6 py-4 bg-slate-50">Email</th>
-                <th className="px-6 py-4 bg-slate-50">Wallet Balance</th>
-                <th className="px-6 py-4 text-right bg-slate-50">Actions</th>
+                <th className="px-6 py-4 bg-slate-50 font-medium">S/N</th>
+                <th className="px-6 py-4 bg-slate-50 font-medium">Full Name</th>
+                <th className="px-6 py-4 bg-slate-50 font-medium">Phone</th>
+                <th className="px-6 py-4 bg-slate-50 font-medium">Email</th>
+                <th className="px-6 py-4 bg-slate-50 font-medium">Wallet Balance</th>
+                <th className="px-6 py-4 text-right bg-slate-50 font-medium">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 font-normal">
               {loading ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-12 text-center">
-                    <FaSpinner className="animate-spin w-6 h-6 text-blue-500 mx-auto" />
+                    <FaSpinner className="animate-spin w-5 h-5 text-blue-500 mx-auto" />
                   </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
@@ -310,55 +324,135 @@ export default function ManageUsers() {
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user, idx) => (
-                  <tr key={user._id || user.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 text-slate-400">{idx + 1}</td>
-                    <td className="px-6 py-4 font-medium text-slate-800">
-                      {user.fullName || user.name || "—"}
-                    </td>
-                    <td className="px-6 py-4">{user.phone || "—"}</td>
-                    <td className="px-6 py-4">{user.email || "—"}</td>
-                    <td className="px-6 py-4 font-semibold text-emerald-600">
-                      ₦{(user.balance || user.walletBalance || 0).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 relative text-right">
-                      <div className="action-menu-wrapper relative inline-flex items-center justify-end">
-                        <button
-                          onClick={(e) => {
-                            const userId = user._id || user.id;
-                            if (actionMenuOpen === userId) {
-                              setActionMenuOpen(null);
-                            } else {
-                              const rect = e.currentTarget.getBoundingClientRect();
-                              setActionMenuPos({ x: rect.right, y: rect.bottom });
-                              setActionMenuOpen(userId);
-                            }
-                          }}
-                          className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors"
-                          aria-label="Open actions"
-                        >
-                          <FaEllipsisV className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                currentItems.map((user, idx) => {
+                  const serialNumber = indexOfFirstItem + idx + 1;
+                  return (
+                    <tr key={user._id || user.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4 text-slate-400 font-normal">{serialNumber}</td>
+                      <td className="px-6 py-4 font-normal text-slate-800">
+                        {user.fullName || user.name || "—"}
+                      </td>
+                      <td className="px-6 py-4 font-normal">{user.phone || "—"}</td>
+                      <td className="px-6 py-4 font-normal">{user.email || "—"}</td>
+                      <td className="px-6 py-4 font-medium text-emerald-600">
+                        ₦{(user.balance || user.walletBalance || 0).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 relative text-right">
+                        <div className="action-menu-wrapper relative inline-flex items-center justify-end">
+                          <button
+                            onClick={(e) => {
+                              const userId = user._id || user.id;
+                              if (actionMenuOpen === userId) {
+                                setActionMenuOpen(null);
+                              } else {
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                setActionMenuPos({ x: rect.right, y: rect.bottom });
+                                setActionMenuOpen(userId);
+                              }
+                            }}
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-850 hover:border-slate-300 transition-colors"
+                            aria-label="Open actions"
+                          >
+                            <FaEllipsisV className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {!loading && filteredUsers.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 font-normal">
+            <div className="flex flex-wrap items-center gap-4">
+              <span>
+                Showing <span className="font-medium text-slate-700">{indexOfFirstItem + 1}</span> to{" "}
+                <span className="font-medium text-slate-700">
+                  {Math.min(indexOfLastItem, filteredUsers.length)}
+                </span>{" "}
+                of <span className="font-medium text-slate-700">{filteredUsers.length}</span> entries
+              </span>
+              <div className="flex items-center gap-1.5">
+                <span>Show</span>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="px-2 py-1 bg-white border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs font-normal"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:hover:bg-white transition-colors font-normal"
+              >
+                Previous
+              </button>
+
+              {(() => {
+                const pages = [];
+                const maxVisible = 5;
+                let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+                let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+                if (endPage - startPage + 1 < maxVisible) {
+                  startPage = Math.max(1, endPage - maxVisible + 1);
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                  pages.push(
+                    <button
+                      key={i}
+                      onClick={() => setCurrentPage(i)}
+                      className={`px-3 py-1.5 rounded-lg border transition-all font-normal ${
+                        currentPage === i
+                          ? "bg-blue-600 border-blue-600 text-white shadow-sm font-medium"
+                          : "bg-white border-slate-200 hover:bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {i}
+                    </button>
+                  );
+                }
+                return pages;
+              })()}
+
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:hover:bg-white transition-colors font-normal"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Fund Modal ────────────────────────────────────────────────────── */}
       {fundModal && (
         <Modal title="Add Wallet Balance" onClose={() => setFundModal(null)}>
-          <div className="mb-4">
-            <p className="text-sm text-slate-500">User</p>
-            <p className="font-semibold text-slate-800">{fundModal.fullName || fundModal.name}</p>
-            <p className="text-xs text-slate-400">{fundModal.phone}</p>
+          <div className="mb-4 text-sm">
+            <p className="text-slate-500">User</p>
+            <p className="font-medium text-slate-800">{fundModal.fullName || fundModal.name}</p>
+            <p className="text-slate-400 text-xs">{fundModal.phone}</p>
           </div>
           <div className="mb-6">
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-xs font-normal text-slate-600 mb-2">
               Amount to Add (₦)
             </label>
             <input
@@ -366,13 +460,13 @@ export default function ManageUsers() {
               value={fundAmount}
               onChange={(e) => setFundAmount(e.target.value)}
               placeholder="e.g. 5000"
-              className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-lg font-bold text-slate-800"
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-base font-normal text-slate-800"
             />
           </div>
           <button
             onClick={saveFund}
             disabled={actionLoading}
-            className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+            className="w-full py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-60 text-sm"
           >
             {actionLoading ? <FaSpinner className="animate-spin" /> : <FaWallet />}
             {actionLoading ? "Processing..." : "Add Balance"}
@@ -383,25 +477,25 @@ export default function ManageUsers() {
       {/* ── Debit Modal ────────────────────────────────────────────────────── */}
       {debitModal && (
         <Modal title="Debit Wallet Balance" onClose={() => setDebitModal(null)}>
-          <div className="mb-4">
-            <p className="text-sm text-slate-500">User</p>
-            <p className="font-semibold text-slate-800">{debitModal.fullName || debitModal.name}</p>
-            <p className="text-xs text-slate-400">{debitModal.phone}</p>
+          <div className="mb-4 text-sm">
+            <p className="text-slate-500">User</p>
+            <p className="font-medium text-slate-800">{debitModal.fullName || debitModal.name}</p>
+            <p className="text-slate-400 text-xs">{debitModal.phone}</p>
           </div>
           <div className="mb-6">
-            <label className="block text-sm font-medium text-slate-700 mb-2">Amount to Debit (₦)</label>
+            <label className="block text-xs font-normal text-slate-600 mb-2">Amount to Debit (₦)</label>
             <input
               type="number"
               value={debitAmount}
               onChange={(e) => setDebitAmount(e.target.value)}
               placeholder="e.g. 5000"
-              className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 outline-none text-lg font-bold text-slate-800"
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none text-base font-normal text-slate-800"
             />
           </div>
           <button
             onClick={saveDebit}
             disabled={actionLoading}
-            className="w-full py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+            className="w-full py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-60 text-sm"
           >
             {actionLoading ? <FaSpinner className="animate-spin" /> : <FaWallet />}
             {actionLoading ? "Processing..." : "Debit Balance"}
@@ -412,19 +506,19 @@ export default function ManageUsers() {
       {/* ── Edit Modal ────────────────────────────────────────────────────── */}
       {editModal && (
         <Modal title="Edit User Info" onClose={() => setEditModal(null)}>
-          <div className="space-y-4 mb-6">
+          <div className="space-y-4 mb-6 text-sm">
             {[
               { label: "Full Name", key: "fullName", type: "text" },
               { label: "Email", key: "email", type: "email" },
               { label: "Phone", key: "phone", type: "tel" },
             ].map(({ label, key, type }) => (
               <div key={key}>
-                <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+                <label className="block text-xs font-normal text-slate-600 mb-1">{label}</label>
                 <input
                   type={type}
                   value={editForm[key]}
                   onChange={(e) => setEditForm((f) => ({ ...f, [key]: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none"
+                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none text-base font-normal text-slate-800"
                 />
               </div>
             ))}
@@ -432,7 +526,7 @@ export default function ManageUsers() {
           <button
             onClick={saveEdit}
             disabled={actionLoading}
-            className="w-full py-3 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+            className="w-full py-2.5 bg-amber-500 text-white font-medium rounded-xl hover:bg-amber-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-60 text-sm"
           >
             {actionLoading ? <FaSpinner className="animate-spin" /> : <FaSave />}
             {actionLoading ? "Saving..." : "Save Changes"}
@@ -448,10 +542,10 @@ export default function ManageUsers() {
         >
           {statsLoading || !statsModal.stats ? (
             <div className="flex items-center justify-center py-10">
-              <FaSpinner className="animate-spin w-8 h-8 text-indigo-500" />
+              <FaSpinner className="animate-spin w-6 h-6 text-indigo-500" />
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 text-sm font-normal">
               <div className="grid grid-cols-2 gap-3">
                 <StatPill
                   label="Role"
@@ -504,20 +598,20 @@ export default function ManageUsers() {
                   color="bg-cyan-50 text-cyan-700"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3 text-sm text-slate-600">
+              <div className="grid grid-cols-2 gap-3 text-xs text-slate-500 font-normal">
                 <div>
-                  <p className="font-semibold">Created</p>
+                  <p className="font-medium text-slate-700">Created</p>
                   <p>{new Date(statsModal.stats.createdAt).toLocaleString()}</p>
                 </div>
                 <div>
-                  <p className="font-semibold">Last Login</p>
+                  <p className="font-medium text-slate-700">Last Login</p>
                   <p>{new Date(statsModal.stats.lastLogin).toLocaleString()}</p>
                 </div>
               </div>
               {/* Raw data fallback */}
               <details className="text-xs text-slate-400">
-                <summary className="cursor-pointer hover:text-slate-600">View raw response</summary>
-                <pre className="mt-2 bg-slate-50 p-3 rounded-lg overflow-auto max-h-40 text-slate-600">
+                <summary className="cursor-pointer hover:text-slate-600 font-normal">View raw response</summary>
+                <pre className="mt-2 bg-slate-50 p-3 rounded-lg overflow-auto max-h-40 text-slate-600 font-normal font-mono text-[10px]">
                   {JSON.stringify(statsModal.stats, null, 2)}
                 </pre>
               </details>
@@ -528,7 +622,7 @@ export default function ManageUsers() {
 
       {/* ── Action Dropdown Menu (Floating) ───────────────────────────────── */}
       {actionMenuOpen && (
-        <div className="action-menu-wrapper">
+        <div className="action-menu-wrapper font-normal">
           <div
             className="fixed z-[100] w-40 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden py-1"
             style={{
@@ -540,13 +634,13 @@ export default function ManageUsers() {
               const user = users.find((u) => (u._id || u.id) === actionMenuOpen);
               if (!user) return null;
               return (
-                <div className="flex flex-col gap-1 px-1">
+                <div className="flex flex-col gap-1 px-1 font-normal">
                   <button
                     onClick={() => {
                       setActionMenuOpen(null);
                       openStats(user);
                     }}
-                    className="w-full text-left px-3 py-1.5 text-xs font-medium rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                    className="w-full text-left px-3 py-1.5 text-xs font-normal rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
                   >
                     Stats
                   </button>
@@ -555,7 +649,7 @@ export default function ManageUsers() {
                       setActionMenuOpen(null);
                       openEdit(user);
                     }}
-                    className="w-full text-left px-3 py-1.5 text-xs font-medium rounded-md bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors"
+                    className="w-full text-left px-3 py-1.5 text-xs font-normal rounded-md bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors"
                   >
                     Edit
                   </button>
@@ -564,7 +658,7 @@ export default function ManageUsers() {
                       setActionMenuOpen(null);
                       openDebit(user);
                     }}
-                    className="w-full text-left px-3 py-1.5 text-xs font-medium rounded-md bg-orange-50 text-orange-700 hover:bg-orange-100 transition-colors"
+                    className="w-full text-left px-3 py-1.5 text-xs font-normal rounded-md bg-orange-50 text-orange-700 hover:bg-orange-100 transition-colors"
                   >
                     Debit
                   </button>
@@ -573,7 +667,7 @@ export default function ManageUsers() {
                       setActionMenuOpen(null);
                       openFund(user);
                     }}
-                    className="w-full text-left px-3 py-1.5 text-xs font-medium rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
+                    className="w-full text-left px-3 py-1.5 text-xs font-normal rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
                   >
                     Fund
                   </button>
@@ -583,7 +677,7 @@ export default function ManageUsers() {
                         setActionMenuOpen(null);
                         handleUpgrade(user);
                       }}
-                      className="w-full text-left px-3 py-1.5 text-xs font-medium rounded-md bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
+                      className="w-full text-left px-3 py-1.5 text-xs font-normal rounded-md bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
                     >
                       Upgrade to Admin
                     </button>
@@ -594,7 +688,7 @@ export default function ManageUsers() {
                         setActionMenuOpen(null);
                         handleDowngrade(user);
                       }}
-                      className="w-full text-left px-3 py-1.5 text-xs font-medium rounded-md bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
+                      className="w-full text-left px-3 py-1.5 text-xs font-normal rounded-md bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
                     >
                       Downgrade to User
                     </button>
@@ -604,7 +698,7 @@ export default function ManageUsers() {
                       setActionMenuOpen(null);
                       handleDelete(user);
                     }}
-                    className="w-full text-left px-3 py-1.5 text-xs font-medium rounded-md bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+                    className="w-full text-left px-3 py-1.5 text-xs font-normal rounded-md bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
                   >
                     Delete
                   </button>

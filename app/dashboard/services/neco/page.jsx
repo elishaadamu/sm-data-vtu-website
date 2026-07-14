@@ -289,21 +289,15 @@ const NecoPage = () => {
 
               {/* Price Calculation Display */}
               {(() => {
-                const fee = Math.min((totalAmount * 0.015) + 50, 5000);
-                const total = totalAmount + fee;
                 return (
                   <div className="bg-teal-50/70 border border-teal-100 p-5 rounded-2xl space-y-3 shadow-sm">
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-slate-500 font-semibold uppercase tracking-wider">Token Cost (₦{cardPrice.toLocaleString()} × {quantity})</span>
                       <span className="font-bold text-slate-800">₦{totalAmount.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between items-center text-xs text-slate-500 border-t border-teal-100 pt-2">
-                      <span>Transaction Fee (1.5% + ₦50)</span>
-                      <span>+₦{fee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    </div>
                     <div className="flex justify-between items-center text-xl font-black text-teal-600 border-t border-teal-200 pt-2">
                       <span>Total Debit</span>
-                      <span>₦{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      <span>₦{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                   </div>
                 );

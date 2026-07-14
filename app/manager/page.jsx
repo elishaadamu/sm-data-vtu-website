@@ -1,306 +1,276 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import Link from "next/link";
 import {
   fetchAdminStats,
   fetchAdminDailyStats,
   fetchAdminWeeklyStats,
+  fetchAdminUsers,
   getAdminStats,
 } from "@/lib/adminStore";
 import { useAppContext } from "@/context/AppContext";
-import { FaUsers, FaUserCheck, FaWallet, FaUserPlus } from "react-icons/fa";
+import {
+  FaUsers,
+  FaUserCheck,
+  FaWallet,
+  FaUserPlus,
+  FaArrowUp,
+  FaArrowDown,
+  FaChartLine,
+  FaShoppingBag,
+  FaMoneyBillWave,
+  FaBell,
+  FaClipboardList,
+  FaHistory,
+  FaArrowRight,
+} from "react-icons/fa";
 import { format } from "date-fns";
 
-const StatCard = ({ title, value, icon: Icon, colorClass, bgClass }) => (
-  <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
-    <div className="flex justify-between items-start">
-      <div>
-        <p className="text-slate-500 text-sm font-medium">{title}</p>
-        <h3 className="text-3xl font-black text-slate-800 mt-2">{value}</h3>
+/* ─────────────────── Mini Sparkline ─────────────────── */
+const Sparkline = ({ data = [], color = "#3b82f6", width = 80, height = 28 }) => {
+  if (!data.length) return null;
+  const max = Math.max(...data, 1);
+  const min = Math.min(...data, 0);
+  const range = max - min || 1;
+  const pad = 2;
+  const plotW = width - pad * 2;
+  const plotH = height - pad * 2;
+
+  const points = data.map((v, i) => {
+    const x = pad + (data.length > 1 ? (i / (data.length - 1)) * plotW : plotW / 2);
+    const y = pad + plotH - ((v - min) / range) * plotH;
+    return `${x},${y}`;
+  });
+
+  return (
+    <svg width={width} height={height} className="overflow-visible">
+      <defs>
+        <linearGradient id={`spark-${color.replace("#", "")}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.02" />
+        </linearGradient>
+      </defs>
+      <polygon
+        points={`${pad},${height - pad} ${points.join(" ")} ${width - pad},${height - pad}`}
+        fill={`url(#spark-${color.replace("#", "")})`}
+      />
+      <polyline
+        points={points.join(" ")}
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+/* ─────────────────── Stat Card ─────────────────── */
+const StatCard = ({ title, value, icon: Icon, gradient, sparkData, sparkColor, trend, delay = 0 }) => (
+  <div
+    className="group relative bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+    style={{ animationDelay: `${delay}ms` }}
+  >
+    {/* Decorative gradient orb */}
+    <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br ${gradient} opacity-10 group-hover:opacity-20 transition-opacity duration-500 blur-xl`} />
+
+    <div className="flex justify-between items-start relative z-10 gap-3">
+      <div className="flex-1 min-w-0">
+        <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider">{title}</p>
+        <h3 className="text-lg sm:text-xl font-semibold text-slate-800 mt-1.5 tracking-tight truncate">{value}</h3>
+        {trend !== undefined && trend !== null && (
+          <div className={`flex items-center gap-1 mt-2 text-xs font-bold ${trend >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+            {trend >= 0 ? <FaArrowUp className="w-2.5 h-2.5" /> : <FaArrowDown className="w-2.5 h-2.5" />}
+            <span>{Math.abs(trend)}%</span>
+            <span className="text-slate-400 font-medium ml-0.5">vs last week</span>
+          </div>
+        )}
       </div>
-      <div className={`p-4 rounded-2xl ${bgClass}`}>
-        <Icon className={`w-6 h-6 ${colorClass}`} />
+      <div className="flex flex-col items-end gap-2">
+        <div className={`p-3 rounded-xl bg-gradient-to-br ${gradient} shadow-lg`}>
+          <Icon className="w-5 h-5 text-white" />
+        </div>
+        {sparkData && sparkData.length > 0 && (
+          <Sparkline data={sparkData} color={sparkColor} />
+        )}
       </div>
     </div>
   </div>
 );
 
+/* ─────────────────── Quick Action Button ─────────────────── */
+const QuickAction = ({ href, icon: Icon, label, gradient, description }) => (
+  <Link
+    href={href}
+    className="group flex items-center gap-4 bg-white border border-slate-200/80 rounded-2xl p-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+  >
+    <div className={`p-3 rounded-xl bg-gradient-to-br ${gradient} shadow-md group-hover:scale-110 transition-transform duration-300`}>
+      <Icon className="w-5 h-5 text-white" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{label}</p>
+      <p className="text-xs text-slate-400 mt-0.5 truncate">{description}</p>
+    </div>
+    <FaArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-300" />
+  </Link>
+);
+
+/* ─────────────────── Chart Colors ─────────────────── */
 const colorMap = {
-  blue:    { bar: "bg-blue-500",    hover: "hover:bg-blue-600",    tab: "bg-blue-600 text-white",    pill: "bg-blue-50 text-blue-700" },
-  purple:  { bar: "bg-purple-500",  hover: "hover:bg-purple-600",  tab: "bg-purple-600 text-white",  pill: "bg-purple-50 text-purple-700" },
-  indigo:  { bar: "bg-indigo-500",  hover: "hover:bg-indigo-600",  tab: "bg-indigo-600 text-white",  pill: "bg-indigo-50 text-indigo-700" },
-  emerald: { bar: "bg-emerald-500", hover: "hover:bg-emerald-600", tab: "bg-emerald-600 text-white", pill: "bg-emerald-50 text-emerald-700" },
+  blue:    { bar: "bg-blue-500",    tab: "bg-blue-600 text-white",    pill: "bg-blue-50 text-blue-700",    pillBorder: "border-blue-200" },
+  purple:  { bar: "bg-purple-500",  tab: "bg-purple-600 text-white",  pill: "bg-purple-50 text-purple-700",  pillBorder: "border-purple-200" },
+  indigo:  { bar: "bg-indigo-500",  tab: "bg-indigo-600 text-white",  pill: "bg-indigo-50 text-indigo-700",  pillBorder: "border-indigo-200" },
+  emerald: { bar: "bg-emerald-500", tab: "bg-emerald-600 text-white", pill: "bg-emerald-50 text-emerald-700", pillBorder: "border-emerald-200" },
 };
 
 const chartColors = {
-  blue: {
-    stroke: "#3b82f6", // blue-500
-    fillGradStart: "rgba(59, 130, 246, 0.25)",
-    fillGradEnd: "rgba(59, 130, 246, 0.01)",
-    dotStroke: "#2563eb", // blue-600
-    dotFill: "#ffffff",
-  },
-  purple: {
-    stroke: "#a855f7", // purple-500
-    fillGradStart: "rgba(168, 85, 247, 0.25)",
-    fillGradEnd: "rgba(168, 85, 247, 0.01)",
-    dotStroke: "#9333ea", // purple-600
-    dotFill: "#ffffff",
-  },
-  indigo: {
-    stroke: "#6366f1", // indigo-500
-    fillGradStart: "rgba(99, 102, 241, 0.25)",
-    fillGradEnd: "rgba(99, 102, 241, 0.01)",
-    dotStroke: "#4f46e5", // indigo-600
-    dotFill: "#ffffff",
-  },
-  emerald: {
-    stroke: "#10b981", // emerald-500
-    fillGradStart: "rgba(16, 185, 129, 0.25)",
-    fillGradEnd: "rgba(16, 185, 129, 0.01)",
-    dotStroke: "#059669", // emerald-600
-    dotFill: "#ffffff",
-  },
+  blue:    { stroke: "#3b82f6", fillStart: "rgba(59,130,246,0.18)", fillEnd: "rgba(59,130,246,0.01)", dot: "#2563eb" },
+  purple:  { stroke: "#a855f7", fillStart: "rgba(168,85,247,0.18)", fillEnd: "rgba(168,85,247,0.01)", dot: "#9333ea" },
+  indigo:  { stroke: "#6366f1", fillStart: "rgba(99,102,241,0.18)", fillEnd: "rgba(99,102,241,0.01)", dot: "#4f46e5" },
+  emerald: { stroke: "#10b981", fillStart: "rgba(16,185,129,0.18)", fillEnd: "rgba(16,185,129,0.01)", dot: "#059669" },
 };
 
+/* ─────────────────── Interactive Line Chart ─────────────────── */
 const LineChart = ({ data = [], labels = [], prefix = "", color = "blue" }) => {
   const c = chartColors[color] || chartColors.blue;
   const containerRef = useRef(null);
-  const [dimensions, setDimensions] = useState({ width: 500, height: 176 });
+  const [dimensions, setDimensions] = useState({ width: 500, height: 200 });
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const resizeObserver = new ResizeObserver((entries) => {
-      if (!entries || entries.length === 0) return;
+    const ro = new ResizeObserver((entries) => {
+      if (!entries[0]) return;
       const { width, height } = entries[0].contentRect;
-      setDimensions({ width: width || 500, height: height || 176 });
+      setDimensions({ width: width || 500, height: height || 200 });
     });
-    resizeObserver.observe(containerRef.current);
-    return () => resizeObserver.disconnect();
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
   }, []);
 
   const { width, height } = dimensions;
-  const paddingLeft = 56;
-  const paddingRight = 20;
-  const paddingTop = 16;
-  const paddingBottom = 24;
-
-  const plotWidth = width - paddingLeft - paddingRight;
-  const plotHeight = height - paddingTop - paddingBottom;
-
+  const pl = 56, pr = 20, pt = 20, pb = 28;
+  const pw = width - pl - pr;
+  const ph = height - pt - pb;
   const maxVal = Math.max(...data, 1);
 
-  // Calculate coordinates
-  const points = data.map((val, i) => {
-    const x = paddingLeft + (data.length > 1 ? (i / (data.length - 1)) * plotWidth : plotWidth / 2);
-    const y = paddingTop + plotHeight - (val / maxVal) * plotHeight;
-    return { x, y, val, label: labels[i] };
-  });
+  const points = data.map((val, i) => ({
+    x: pl + (data.length > 1 ? (i / (data.length - 1)) * pw : pw / 2),
+    y: pt + ph - (val / maxVal) * ph,
+    val,
+    label: labels[i],
+  }));
 
-  // Build the line path description
-  const linePath = points.length > 0
-    ? points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ")
-    : "";
-
-  // Build the gradient area path
+  const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
   const areaPath = points.length > 0
-    ? `${linePath} L ${points[points.length - 1].x} ${height - paddingBottom} L ${points[0].x} ${height - paddingBottom} Z`
+    ? `${linePath} L ${points[points.length - 1].x} ${height - pb} L ${points[0].x} ${height - pb} Z`
     : "";
 
-  const gradId = `grad-${color}`;
+  const gradId = `chartGrad-${color}`;
 
-  const handleMouseMove = (e) => {
-    if (!containerRef.current || points.length === 0) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    
-    let closestIndex = 0;
-    let minDiff = Infinity;
-    points.forEach((p, idx) => {
-      const diff = Math.abs(p.x - mouseX);
-      if (diff < minDiff) {
-        minDiff = diff;
-        closestIndex = idx;
-      }
-    });
-
-    const stepX = data.length > 1 ? plotWidth / (data.length - 1) : plotWidth;
-    if (minDiff < stepX / 1.5) {
-      setHoveredIndex(closestIndex);
-    } else {
-      setHoveredIndex(null);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setHoveredIndex(null);
-  };
-
-  // Helper for formatting Y-axis scale values compactly
-  const formatYLabel = (val) => {
+  const formatY = (val) => {
     if (val === 0) return "0";
-    const absVal = Math.abs(val);
-    if (absVal >= 1e9) return `${prefix}${(val / 1e9).toFixed(1).replace(/\.0$/, "")}B`;
-    if (absVal >= 1e6) return `${prefix}${(val / 1e6).toFixed(1).replace(/\.0$/, "")}M`;
-    if (absVal >= 1e3) return `${prefix}${(val / 1e3).toFixed(1).replace(/\.0$/, "")}k`;
+    if (Math.abs(val) >= 1e9) return `${prefix}${(val / 1e9).toFixed(1).replace(/\.0$/, "")}B`;
+    if (Math.abs(val) >= 1e6) return `${prefix}${(val / 1e6).toFixed(1).replace(/\.0$/, "")}M`;
+    if (Math.abs(val) >= 1e3) return `${prefix}${(val / 1e3).toFixed(1).replace(/\.0$/, "")}k`;
     return `${prefix}${val.toLocaleString()}`;
   };
 
+  const handleMouseMove = (e) => {
+    if (!containerRef.current || !points.length) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    let closest = 0, minDiff = Infinity;
+    points.forEach((p, i) => { const d = Math.abs(p.x - mouseX); if (d < minDiff) { minDiff = d; closest = i; } });
+    const step = data.length > 1 ? pw / (data.length - 1) : pw;
+    setHoveredIndex(minDiff < step / 1.5 ? closest : null);
+  };
+
   return (
-    <div className="mt-6">
+    <div className="mt-4">
       <div
         ref={containerRef}
-        className="h-44 w-full relative overflow-visible cursor-pointer select-none"
+        className="h-52 w-full relative overflow-visible cursor-crosshair select-none"
         onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        onMouseLeave={() => setHoveredIndex(null)}
       >
         <svg width="100%" height="100%" className="overflow-visible">
           <defs>
             <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={c.fillGradStart} />
-              <stop offset="100%" stopColor={c.fillGradEnd} />
+              <stop offset="0%" stopColor={c.fillStart} />
+              <stop offset="100%" stopColor={c.fillEnd} />
             </linearGradient>
           </defs>
 
           {/* Grid lines */}
-          <line
-            x1={paddingLeft}
-            y1={paddingTop}
-            x2={width - paddingRight}
-            y2={paddingTop}
-            stroke="rgba(148, 163, 184, 0.12)"
-            strokeWidth="1"
-            strokeDasharray="4 4"
-          />
-          <line
-            x1={paddingLeft}
-            y1={paddingTop + plotHeight / 2}
-            x2={width - paddingRight}
-            y2={paddingTop + plotHeight / 2}
-            stroke="rgba(148, 163, 184, 0.12)"
-            strokeWidth="1"
-            strokeDasharray="4 4"
-          />
-          <line
-            x1={paddingLeft}
-            y1={height - paddingBottom}
-            x2={width - paddingRight}
-            y2={height - paddingBottom}
-            stroke="rgba(148, 163, 184, 0.18)"
-            strokeWidth="1"
-          />
+          {[0, 0.25, 0.5, 0.75, 1].map((frac, i) => (
+            <line
+              key={i}
+              x1={pl} y1={pt + ph * (1 - frac)} x2={width - pr} y2={pt + ph * (1 - frac)}
+              stroke="rgba(148,163,184,0.12)" strokeWidth="1" strokeDasharray={frac === 0 ? "" : "4 4"}
+            />
+          ))}
 
-          {/* Y Axis Left Scale Labels */}
-          <text
-            x={paddingLeft - 8}
-            y={paddingTop + 3}
-            textAnchor="end"
-            className="text-[9px] font-bold fill-slate-400 select-none"
-          >
-            {formatYLabel(maxVal)}
-          </text>
-          <text
-            x={paddingLeft - 8}
-            y={paddingTop + plotHeight / 2 + 3}
-            textAnchor="end"
-            className="text-[9px] font-bold fill-slate-400 select-none"
-          >
-            {formatYLabel(maxVal / 2)}
-          </text>
-          <text
-            x={paddingLeft - 8}
-            y={height - paddingBottom + 3}
-            textAnchor="end"
-            className="text-[9px] font-bold fill-slate-400 select-none"
-          >
-            {formatYLabel(0)}
-          </text>
+          {/* Y labels */}
+          {[0, 0.5, 1].map((frac, i) => (
+            <text key={i} x={pl - 8} y={pt + ph * (1 - frac) + 4}
+              textAnchor="end" className="text-[9px] font-bold fill-slate-400 select-none"
+            >
+              {formatY(maxVal * frac)}
+            </text>
+          ))}
 
-          {/* Vertical indicator line when hovered */}
+          {/* Hover vertical indicator */}
           {hoveredIndex !== null && points[hoveredIndex] && (
             <line
-              x1={points[hoveredIndex].x}
-              y1={paddingTop}
-              x2={points[hoveredIndex].x}
-              y2={height - paddingBottom}
-              stroke={c.stroke}
-              strokeWidth="1.5"
-              strokeDasharray="3 3"
+              x1={points[hoveredIndex].x} y1={pt} x2={points[hoveredIndex].x} y2={height - pb}
+              stroke={c.stroke} strokeWidth="1.5" strokeDasharray="3 3" opacity="0.5"
+            />
+          )}
+
+          {/* Area fill */}
+          {areaPath && <path d={areaPath} fill={`url(#${gradId})`} />}
+
+          {/* Line */}
+          {linePath && (
+            <path d={linePath} fill="none" stroke={c.stroke} strokeWidth="2.5"
+              strokeLinecap="round" strokeLinejoin="round" />
+          )}
+
+          {/* Dots */}
+          {points.map((p, idx) => (
+            <circle
+              key={idx} cx={p.x} cy={p.y}
+              r={hoveredIndex === idx ? 6 : 3.5}
+              fill={hoveredIndex === idx ? c.stroke : "#fff"}
+              stroke={c.dot} strokeWidth={hoveredIndex === idx ? 3 : 2}
               className="transition-all duration-150"
             />
-          )}
+          ))}
 
-          {/* Gradient Fill under line */}
-          {areaPath && (
-            <path
-              d={areaPath}
-              fill={`url(#${gradId})`}
-              className="transition-all duration-500 ease-out"
-            />
-          )}
-
-          {/* Path Line */}
-          {linePath && (
-            <path
-              d={linePath}
-              fill="none"
-              stroke={c.stroke}
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="transition-all duration-500 ease-out"
-            />
-          )}
-
-          {/* Data point dots */}
-          {points.map((p, idx) => {
-            const isHovered = hoveredIndex === idx;
-            return (
-              <circle
-                key={idx}
-                cx={p.x}
-                cy={p.y}
-                r={isHovered ? 6 : 4}
-                fill={c.dotFill}
-                stroke={isHovered ? c.stroke : c.dotStroke}
-                strokeWidth={isHovered ? 3.5 : 2}
-                className="transition-all duration-150 ease-out"
-              />
-            );
-          })}
-
-          {/* X Axis Labels inside SVG */}
+          {/* X labels */}
           {points.map((p, idx) => (
-            <text
-              key={idx}
-              x={p.x}
-              y={height - 4}
-              textAnchor="middle"
-              className={`text-[9px] font-semibold select-none transition-colors duration-150 ${
-                hoveredIndex === idx ? "fill-slate-800 font-bold" : "fill-slate-400"
-              }`}
+            <text key={idx} x={p.x} y={height - 6} textAnchor="middle"
+              className={`text-[9px] font-semibold select-none transition-colors ${hoveredIndex === idx ? "fill-slate-800" : "fill-slate-400"}`}
             >
               {p.label}
             </text>
           ))}
         </svg>
 
-        {/* Floating Tooltip */}
+        {/* Tooltip */}
         {hoveredIndex !== null && points[hoveredIndex] && (
           <div
-            className="absolute pointer-events-none bg-slate-900/95 text-white text-xs font-semibold py-2 px-3 rounded-xl shadow-xl z-20 transition-all duration-100 ease-out backdrop-blur-sm border border-slate-700/50"
+            className="absolute pointer-events-none bg-slate-900/95 text-white text-xs font-semibold py-2.5 px-4 rounded-xl shadow-2xl z-20 backdrop-blur-sm border border-slate-700/50"
             style={{
               left: `${points[hoveredIndex].x}px`,
-              top: `${points[hoveredIndex].y - 12}px`,
+              top: `${points[hoveredIndex].y - 14}px`,
               transform: "translate(-50%, -100%)",
             }}
           >
-            <div className="text-[10px] text-slate-400 font-medium">
-              {points[hoveredIndex].label}
-            </div>
-            <div className="text-sm font-bold mt-0.5">
-              {prefix}{points[hoveredIndex].val.toLocaleString()}
-            </div>
+            <div className="text-[10px] text-slate-400 font-medium">{points[hoveredIndex].label}</div>
+            <div className="text-sm font-bold mt-0.5">{prefix}{points[hoveredIndex].val.toLocaleString()}</div>
           </div>
         )}
       </div>
@@ -308,56 +278,60 @@ const LineChart = ({ data = [], labels = [], prefix = "", color = "blue" }) => {
   );
 };
 
-// Tabbed chart panel
-const ChartPanel = ({ title, tabs = [], labels = [] }) => {
+/* ─────────────────── Chart Panel ─────────────────── */
+const ChartPanel = ({ title, tabs = [], labels = [], icon: ChartIcon }) => {
   const [active, setActive] = useState(tabs[0]?.key || "");
   const current = tabs.find((t) => t.key === active) || tabs[0];
   const c = colorMap[current?.color] || colorMap.blue;
-
   const total = (current?.data || []).reduce((s, v) => s + (v || 0), 0);
 
   return (
-    <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4">
-        <h3 className="text-base font-bold text-slate-800 shrink-0">{title}</h3>
-        <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit shrink-0">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActive(tab.key)}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-all ${
-                active === tab.key
-                  ? c.tab
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+    <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300">
+      <div className="p-6 pb-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-2">
+            {ChartIcon && <ChartIcon className="w-4 h-4 text-slate-400" />}
+            <h3 className="text-sm font-bold text-slate-800">{title}</h3>
+          </div>
+          <div className="flex gap-1 bg-slate-100 p-0.5 rounded-lg w-fit">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActive(tab.key)}
+                className={`text-[11px] font-semibold px-3 py-1.5 rounded-md transition-all duration-200 ${
+                  active === tab.key ? c.tab + " shadow-sm" : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${c.pill} ${c.pillBorder}`}>
+          Total: {current?.prefix}{total.toLocaleString()}
         </div>
       </div>
 
-      {/* Summary pill */}
-      <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold mb-2 ${c.pill}`}>
-        Total: {current?.prefix}{total.toLocaleString()}
+      <div className="px-6 pb-6">
+        {(current?.data || []).length === 0 ? (
+          <div className="flex items-center justify-center h-52 text-slate-400 text-sm">
+            No data available
+          </div>
+        ) : (
+          <LineChart
+            data={current?.data || []}
+            labels={labels}
+            prefix={current?.prefix || ""}
+            color={current?.color || "blue"}
+          />
+        )}
       </div>
-
-      {(current?.data || []).length === 0 ? (
-        <div className="flex items-center justify-center h-44 text-slate-400 text-sm">
-          No data available
-        </div>
-      ) : (
-        <LineChart
-          data={current?.data || []}
-          labels={labels}
-          prefix={current?.prefix || ""}
-          color={current?.color || "blue"}
-        />
-      )}
     </div>
   );
 };
 
+/* ─────────────────── Main Dashboard ─────────────────── */
 export default function ManagerDashboard() {
   const { managerData } = useAppContext();
   const [stats, setStats] = useState(null);
@@ -375,7 +349,6 @@ export default function ManagerDashboard() {
             fetchAdminDailyStats(adminId),
             fetchAdminWeeklyStats(adminId),
           ]);
-         
           setStats(statsRes);
           setDailyData(dailyRes);
           setWeeklyData(weeklyRes);
@@ -390,7 +363,6 @@ export default function ManagerDashboard() {
         }
       } catch (error) {
         const fallback = getAdminStats();
-        
         setStats(fallback);
         setDailyData(fallback.dailySales || []);
         setWeeklyData(fallback.weeklySales || []);
@@ -403,21 +375,11 @@ export default function ManagerDashboard() {
     return () => clearTimeout(timer);
   }, [managerData]);
 
-  if (loading || !stats) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-      </div>
-    );
-  }
+  // Build chart data
+  const rawDailyData = useMemo(() =>
+    Array.isArray(dailyData) ? dailyData : Array.isArray(dailyData?.sales) ? dailyData.sales : []
+  , [dailyData]);
 
-  // Daily data: array of { date, usersRegistered, transactionsCount, totalTransactionAmount }
-  const rawDailyData = Array.isArray(dailyData)
-    ? dailyData
-    : Array.isArray(dailyData?.sales)
-    ? dailyData.sales
-    : [];
-    
   const dailySales = rawDailyData.map((d) => typeof d === "number" ? d : (d?.totalTransactionAmount || 0));
   const dailyTransactions = rawDailyData.map((d) => typeof d === "number" ? 0 : (d?.transactionsCount || 0));
   const dailyUsers = rawDailyData.map((d) => typeof d === "number" ? 0 : (d?.usersRegistered || 0));
@@ -425,13 +387,10 @@ export default function ManagerDashboard() {
     (typeof d === "object" && d?.date) ? format(new Date(d.date), "MMM dd") : `Day ${i + 1}`
   );
 
-  // Weekly data: array of { week, usersRegistered, transactionsCount, totalTransactionAmount }
-  const rawWeeklyData = Array.isArray(weeklyData)
-    ? weeklyData
-    : Array.isArray(weeklyData?.sales)
-    ? weeklyData.sales
-    : [];
-    
+  const rawWeeklyData = useMemo(() =>
+    Array.isArray(weeklyData) ? weeklyData : Array.isArray(weeklyData?.sales) ? weeklyData.sales : []
+  , [weeklyData]);
+
   const weeklySales = rawWeeklyData.map((d) => typeof d === "number" ? d : (d?.totalTransactionAmount || 0));
   const weeklyTransactions = rawWeeklyData.map((d) => typeof d === "number" ? 0 : (d?.transactionsCount || 0));
   const weeklyUsers = rawWeeklyData.map((d) => typeof d === "number" ? 0 : (d?.usersRegistered || 0));
@@ -448,50 +407,150 @@ export default function ManagerDashboard() {
     return `Week ${i + 1}`;
   });
 
+  // Get current time greeting
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    return "Good Evening";
+  };
+
+  const adminName = managerData?.name || managerData?.username || "Admin";
+
+  if (loading || !stats) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="relative">
+          <div className="w-14 h-14 border-4 border-blue-100 rounded-full" />
+          <div className="w-14 h-14 border-4 border-blue-600 border-t-transparent rounded-full animate-spin absolute inset-0" />
+        </div>
+        <p className="text-slate-400 text-sm font-medium animate-pulse">Loading dashboard...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard Overview</h1>
-        <p className="text-slate-500 mt-1">Welcome back. Here is what&apos;s happening today.</p>
+    <div className="space-y-8">
+
+      {/* ── Hero Greeting Banner ── */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 p-6 lg:p-8 text-white">
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-72 h-72 bg-blue-500/10 rounded-full -translate-y-1/2 translate-x-1/4 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 w-48 h-48 bg-indigo-500/15 rounded-full translate-y-1/2 blur-2xl" />
+        <div className="absolute top-1/2 right-1/4 w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+        <div className="absolute top-1/3 right-1/3 w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse" style={{ animationDelay: "500ms" }} />
+
+        <div className="relative z-10">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <p className="text-blue-300 text-sm font-medium mb-1">
+                {format(new Date(), "EEEE, MMMM d, yyyy")}
+              </p>
+              <h1 className="text-2xl lg:text-3xl font-black tracking-tight">
+                {getGreeting()}, {adminName} 👋
+              </h1>
+              <p className="text-blue-200/70 text-sm mt-2 max-w-md">
+                Here&apos;s what&apos;s happening across your platform today. Monitor performance and manage your operations.
+              </p>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <Link
+                href="/manager/users"
+                className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-sm font-semibold backdrop-blur-sm transition-all duration-300"
+              >
+                <FaUsers className="w-3.5 h-3.5" />
+                <span>Users</span>
+              </Link>
+              <Link
+                href="/manager/orders"
+                className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 hover:bg-blue-400 rounded-xl text-sm font-semibold shadow-lg shadow-blue-900/50 transition-all duration-300"
+              >
+                <FaChartLine className="w-3.5 h-3.5" />
+                <span>View Orders</span>
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* ── Stat Cards ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
         <StatCard
           title="Total Users"
           value={(stats?.totalUsers || 0).toLocaleString()}
           icon={FaUsers}
-          colorClass="text-blue-600"
-          bgClass="bg-blue-50"
+          gradient="from-blue-500 to-blue-600"
+          sparkData={dailyUsers}
+          sparkColor="#3b82f6"
+          delay={0}
         />
         <StatCard
           title="Active Users"
           value={(stats?.activeUsers || 0).toLocaleString()}
           icon={FaUserCheck}
-          colorClass="text-emerald-600"
-          bgClass="bg-emerald-50"
+          gradient="from-emerald-500 to-emerald-600"
+          sparkData={dailyTransactions}
+          sparkColor="#10b981"
+          delay={75}
         />
         <StatCard
           title="Total Funds"
           value={`₦${(stats?.totalFunds || 0).toLocaleString()}`}
           icon={FaWallet}
-          colorClass="text-purple-600"
-          bgClass="bg-purple-50"
+          gradient="from-purple-500 to-purple-600"
+          sparkData={dailySales}
+          sparkColor="#a855f7"
+          delay={150}
         />
         <StatCard
-          title="New Users (Today)"
+          title="New Users Today"
           value={(stats?.newUsersToday || 0).toLocaleString()}
           icon={FaUserPlus}
-          colorClass="text-amber-600"
-          bgClass="bg-amber-50"
+          gradient="from-amber-500 to-orange-500"
+          delay={225}
         />
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Daily Chart */}
+      {/* ── Quick Actions ── */}
+      <div>
+        <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Quick Actions</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <QuickAction
+            href="/manager/users"
+            icon={FaUsers}
+            label="Manage Users"
+            gradient="from-blue-500 to-blue-600"
+            description="View & manage all users"
+          />
+          <QuickAction
+            href="/manager/plans"
+            icon={FaClipboardList}
+            label="Manage Plans"
+            gradient="from-indigo-500 to-indigo-600"
+            description="Data plans & pricing"
+          />
+          <QuickAction
+            href="/manager/payments"
+            icon={FaMoneyBillWave}
+            label="Payment History"
+            gradient="from-emerald-500 to-emerald-600"
+            description="Deposits & wallet funding"
+          />
+          <QuickAction
+            href="/manager/send-notification"
+            icon={FaBell}
+            label="Send Notification"
+            gradient="from-amber-500 to-orange-500"
+            description="Broadcast to users"
+          />
+        </div>
+      </div>
+
+      {/* ── Charts ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <ChartPanel
-          title="Daily Stats (Last 7 Days)"
+          title="Daily Performance (Last 7 Days)"
+          icon={FaChartLine}
           tabs={[
             { key: "revenue", label: "Revenue", data: dailySales, prefix: "₦", color: "blue" },
             { key: "txns", label: "Transactions", data: dailyTransactions, prefix: "", color: "indigo" },
@@ -499,9 +558,9 @@ export default function ManagerDashboard() {
           ]}
           labels={dailyLabels}
         />
-        {/* Weekly Chart */}
         <ChartPanel
-          title="Weekly Stats (Last 4 Weeks)"
+          title="Weekly Overview (Last 4 Weeks)"
+          icon={FaHistory}
           tabs={[
             { key: "revenue", label: "Revenue", data: weeklySales, prefix: "₦", color: "purple" },
             { key: "txns", label: "Transactions", data: weeklyTransactions, prefix: "", color: "indigo" },

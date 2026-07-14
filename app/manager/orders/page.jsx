@@ -87,9 +87,70 @@ export default function OrderHistory() {
         const matchesStatus =
           statusFilter === "All" ||
           order.status.toLowerCase().includes(statusFilter.toLowerCase());
-        return matchesSearch && matchesStatus;
+
+        const selectedUser = users.find(u => (u._id === selectedUserId || u.id === selectedUserId));
+        const matchesUser = !selectedUserId ||
+          order.raw?.userId === selectedUserId ||
+          order.raw?.user === selectedUserId ||
+          order.raw?.user?._id === selectedUserId ||
+          order.raw?.user?.id === selectedUserId ||
+          (selectedUser && (
+            (selectedUser.phone && order.agentPhone === selectedUser.phone) ||
+            (selectedUser.phone && order.phone === selectedUser.phone) ||
+            (selectedUser.email && order.raw?.email === selectedUser.email)
+          ));
+
+        return matchesSearch && matchesStatus && matchesUser;
       });
-  }, [transactions, searchTerm, statusFilter]);
+  }, [transactions, searchTerm, statusFilter, selectedUserId, users]);
+
+  const getUserName = (order) => {
+    // 1. Try to extract directly from populated user object in raw transaction
+    const rawUser = order.raw?.user;
+    if (rawUser && typeof rawUser === "object") {
+      const name = (rawUser.fullName || `${rawUser.firstName || ""} ${rawUser.lastName || ""}`.trim() || rawUser.username || rawUser.name || "").trim();
+      if (name) return name;
+    }
+
+    // 2. Extract user ID
+    let txUserId = "";
+    if (order.raw?.userId) {
+      txUserId = typeof order.raw.userId === "object" ? (order.raw.userId._id || order.raw.userId.id) : String(order.raw.userId);
+    } else if (order.raw?.user) {
+      txUserId = typeof order.raw.user === "object" ? (order.raw.user._id || order.raw.user.id) : String(order.raw.user);
+    }
+
+    // 3. Extract and normalize phone numbers
+    const normalizePhone = (p) => {
+      if (!p) return "";
+      const cleaned = String(p).replace(/\D/g, "");
+      if (cleaned.startsWith("234") && cleaned.length === 13) {
+        return "0" + cleaned.slice(3);
+      }
+      return cleaned;
+    };
+
+    const agentPhone = order.agentPhone || order.phone;
+    const normAgentPhone = normalizePhone(agentPhone);
+
+    // 4. Find user in the users state
+    const matchedUser = users.find((u) => {
+      const uId = u._id || u.id;
+      if (txUserId && uId && String(uId) === String(txUserId)) return true;
+      
+      const uPhone = normalizePhone(u.phone);
+      if (normAgentPhone && uPhone && uPhone === normAgentPhone) return true;
+      
+      return false;
+    });
+
+    if (matchedUser) {
+      const name = (matchedUser.fullName || `${matchedUser.firstName || ""} ${matchedUser.lastName || ""}`.trim() || matchedUser.username || matchedUser.name || "").trim();
+      return name || agentPhone || "N/A";
+    }
+
+    return agentPhone && agentPhone !== "N/A" ? agentPhone : "N/A";
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -99,6 +160,22 @@ export default function OrderHistory() {
           <p className="text-slate-500 mt-1">Review all data and service purchases across the platform.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative w-full sm:w-48">
+            <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <select
+              value={selectedUserId}
+              onChange={(e) => setSelectedUserId(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-white appearance-none"
+              disabled={usersLoading}
+            >
+              <option value="">{usersLoading ? "Loading Users..." : "All Users"}</option>
+              {users.map((user) => (
+                <option key={user._id || user.id} value={user._id || user.id}>
+                  {user.firstName || ""} {user.lastName || ""} ({user.phone || user.email || ""})
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="relative w-full sm:w-64">
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -143,7 +220,7 @@ export default function OrderHistory() {
                 <th className="px-4 py-3">Network</th>
                 <th className="px-4 py-3">Type</th>
                 <th className="px-4 py-3">Amount / Plan</th>
-                <th className="px-4 py-3">Phone</th>
+                <th className="px-4 py-3">User</th>
                 <th className="px-4 py-3 text-center">Status</th>
                 <th className="px-4 py-3 text-right">Prev Bal</th>
                 <th className="px-4 py-3 text-right">New Bal</th>
@@ -168,7 +245,7 @@ export default function OrderHistory() {
                     <td className="px-4 py-3 font-medium text-slate-800">
                       {formatCurrency(order.amount)} / {order.plan}
                     </td>
-                    <td className="px-4 py-3">{order.phone}</td>
+                    <td className="px-4 py-3">{getUserName(order)}</td>
                     <td className="px-4 py-3 text-center">
                       <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${statusClass(order.status)}`}>
                         {order.status}

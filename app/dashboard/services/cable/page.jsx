@@ -423,21 +423,15 @@ const CablePage = () => {
           {/* Package Details Display */}
           {selectedPackageDetails && (() => {
             const amount = selectedPackageDetails.price;
-            const fee = Math.min((amount * 0.015) + 50, 5000);
-            const total = amount + fee;
             return (
               <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl space-y-2">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-slate-600 font-medium">{selectedPackageDetails.name} ({selectedPackageDetails.duration})</span>
                   <span className="font-bold text-slate-800">₦{amount.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between items-center text-xs text-slate-500 border-t border-red-100 pt-1">
-                  <span>Transaction Charge (1.5% + ₦50)</span>
-                  <span>+₦{fee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
                 <div className="flex justify-between items-center text-base font-bold text-red-600 border-t border-red-200 pt-2">
                   <span>Total Debit</span>
-                  <span>₦{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span>₦{amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               </div>
             );

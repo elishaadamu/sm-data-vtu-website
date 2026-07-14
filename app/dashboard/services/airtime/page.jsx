@@ -216,21 +216,15 @@ const AirtimePage = () => {
           {/* Price Display / Charge breakdown */}
           {amount && parseFloat(amount) > 0 && (() => {
             const amt = parseFloat(amount);
-            const fee = Math.min((amt * 0.015) + 50, 5000);
-            const total = amt + fee;
             return (
               <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-xl space-y-2">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-slate-600 font-medium">Airtime Amount</span>
                   <span className="font-bold text-slate-800">₦{amt.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between items-center text-xs text-slate-500 border-t border-purple-100 pt-1">
-                  <span>Transaction Charge (1.5% + ₦50)</span>
-                  <span>+₦{fee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
                 <div className="flex justify-between items-center text-base font-bold text-purple-600 border-t border-purple-200 pt-2">
                   <span>Total Debit</span>
-                  <span>₦{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span>₦{amt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               </div>
             );

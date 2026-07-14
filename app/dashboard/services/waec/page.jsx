@@ -289,21 +289,15 @@ const WaecPage = () => {
 
               {/* Price Calculation Display */}
               {(() => {
-                const fee = Math.min((totalAmount * 0.015) + 50, 5000);
-                const total = totalAmount + fee;
                 return (
                   <div className="bg-blue-50/70 border border-blue-100 p-5 rounded-2xl space-y-3 shadow-sm">
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-slate-500 font-semibold uppercase tracking-wider">Exam Cost (₦{cardPrice.toLocaleString()} × {quantity})</span>
                       <span className="font-bold text-slate-800">₦{totalAmount.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between items-center text-xs text-slate-500 border-t border-blue-100 pt-2">
-                      <span>Transaction Fee (1.5% + ₦50)</span>
-                      <span>+₦{fee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    </div>
                     <div className="flex justify-between items-center text-xl font-black text-blue-600 border-t border-blue-200 pt-2">
                       <span>Total Debit</span>
-                      <span>₦{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      <span>₦{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                   </div>
                 );

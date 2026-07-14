@@ -20,6 +20,7 @@ import {
   FaChevronRight,
   FaPlus,
   FaUserCircle,
+  FaBullhorn,
 } from "react-icons/fa";
 import axios from "axios";
 import { apiUrl, API_CONFIG } from "@/configs/api";
@@ -38,6 +39,7 @@ const ServicesLayout = () => {
   const [bvn, setBvn] = useState("");
   const [accountDetails, setAccountDetails] = useState(null);
   const [fundingsCount, setFundingsCount] = useState(0);
+  const [notifications, setNotifications] = useState([]);
 
   const services = [
     {
@@ -164,6 +166,24 @@ const ServicesLayout = () => {
     fetchWalletBalance();
   }, [userData]);
 
+  // Fetch notifications
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (!userData) return;
+      const userId = userData?.id || userData?._id;
+      if (!userId) return;
+
+      try {
+        const response = await axios.get(apiUrl(API_CONFIG.ENDPOINTS.NOTIFICATIONS.GET + userId));
+        setNotifications(response.data?.data || response.data?.notifications || response.data || []);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      }
+    };
+
+    fetchNotifications();
+  }, [userData]);
+
   // Fetch recent transactions
   useEffect(() => {
     const fetchRecentTransactions = async () => {
@@ -281,6 +301,24 @@ const ServicesLayout = () => {
         </div>
 
         <div className="relative max-w-7xl mx-auto  sm:px-6 lg:px-8 ">
+          {/* Notifications Banner */}
+          {notifications && notifications.length > 0 && (
+            <div className="mb-6 bg-emerald-50/80 border border-emerald-100 px-4 py-3 rounded-2xl flex items-center gap-3 overflow-hidden shadow-sm relative z-10">
+              <div className="bg-emerald-100/80 p-2 rounded-xl shrink-0 flex items-center justify-center">
+                <FaBullhorn className="w-5 h-5 text-emerald-700" />
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <marquee className="text-emerald-800 font-bold text-sm tracking-wide flex items-center pt-1" scrollamount="5">
+                  {notifications.map((n, i) => (
+                    <span key={n._id || i} className="mr-16">
+                      {n.title ? `${n.title}: ` : ""}{n.message}
+                    </span>
+                  ))}
+                </marquee>
+              </div>
+            </div>
+          )}
+
           {/* Header Section */}
           {/* <div className="mb-10 lg:mb-8">
             <div>

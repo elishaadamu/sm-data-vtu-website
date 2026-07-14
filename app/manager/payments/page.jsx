@@ -86,9 +86,70 @@ export default function PaymentHistory() {
         const matchesStatus =
           statusFilter === "All" ||
           payment.status.toLowerCase().includes(statusFilter.toLowerCase());
-        return matchesSearch && matchesStatus;
+
+        const selectedUser = users.find(u => (u._id === selectedUserId || u.id === selectedUserId));
+        const matchesUser = !selectedUserId ||
+          payment.raw?.userId === selectedUserId ||
+          payment.raw?.user === selectedUserId ||
+          payment.raw?.user?._id === selectedUserId ||
+          payment.raw?.user?.id === selectedUserId ||
+          (selectedUser && (
+            (selectedUser.phone && payment.agentPhone === selectedUser.phone) ||
+            (selectedUser.phone && payment.phone === selectedUser.phone) ||
+            (selectedUser.email && payment.raw?.email === selectedUser.email)
+          ));
+
+        return matchesSearch && matchesStatus && matchesUser;
       });
-  }, [transactions, searchTerm, statusFilter]);
+  }, [transactions, searchTerm, statusFilter, selectedUserId, users]);
+
+  const getUserName = (payment) => {
+    // 1. Try to extract directly from populated user object in raw transaction
+    const rawUser = payment.raw?.user;
+    if (rawUser && typeof rawUser === "object") {
+      const name = (rawUser.fullName || `${rawUser.firstName || ""} ${rawUser.lastName || ""}`.trim() || rawUser.username || rawUser.name || "").trim();
+      if (name) return name;
+    }
+
+    // 2. Extract user ID
+    let txUserId = "";
+    if (payment.raw?.userId) {
+      txUserId = typeof payment.raw.userId === "object" ? (payment.raw.userId._id || payment.raw.userId.id) : String(payment.raw.userId);
+    } else if (payment.raw?.user) {
+      txUserId = typeof payment.raw.user === "object" ? (payment.raw.user._id || payment.raw.user.id) : String(payment.raw.user);
+    }
+
+    // 3. Extract and normalize phone numbers
+    const normalizePhone = (p) => {
+      if (!p) return "";
+      const cleaned = String(p).replace(/\D/g, "");
+      if (cleaned.startsWith("234") && cleaned.length === 13) {
+        return "0" + cleaned.slice(3);
+      }
+      return cleaned;
+    };
+
+    const agentPhone = payment.agentPhone || payment.phone;
+    const normAgentPhone = normalizePhone(agentPhone);
+
+    // 4. Find user in the users state
+    const matchedUser = users.find((u) => {
+      const uId = u._id || u.id;
+      if (txUserId && uId && String(uId) === String(txUserId)) return true;
+      
+      const uPhone = normalizePhone(u.phone);
+      if (normAgentPhone && uPhone && uPhone === normAgentPhone) return true;
+      
+      return false;
+    });
+
+    if (matchedUser) {
+      const name = (matchedUser.fullName || `${matchedUser.firstName || ""} ${matchedUser.lastName || ""}`.trim() || matchedUser.username || matchedUser.name || "").trim();
+      return name || agentPhone || "N/A";
+    }
+
+    return agentPhone && agentPhone !== "N/A" ? agentPhone : "N/A";
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -98,6 +159,22 @@ export default function PaymentHistory() {
           <p className="text-slate-500 mt-1">Review all wallet funding and deposits across the platform.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative w-full sm:w-48">
+            <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <select
+              value={selectedUserId}
+              onChange={(e) => setSelectedUserId(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-white appearance-none"
+              disabled={usersLoading}
+            >
+              <option value="">{usersLoading ? "Loading Users..." : "All Users"}</option>
+              {users.map((user) => (
+                <option key={user._id || user.id} value={user._id || user.id}>
+                  {user.firstName || ""} {user.lastName || ""} ({user.phone || user.email || ""})
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="relative w-full sm:w-64">
             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -139,7 +216,7 @@ export default function PaymentHistory() {
               <tr>
                 <th className="px-4 py-3">Date</th>
                 <th className="px-4 py-3">Transaction ID</th>
-                <th className="px-4 py-3">Agent Phone</th>
+                <th className="px-4 py-3">User</th>
                 <th className="px-4 py-3">Type</th>
                 <th className="px-4 py-3">Amount</th>
                 <th className="px-4 py-3 text-center">Status</th>
@@ -161,7 +238,7 @@ export default function PaymentHistory() {
                   <tr key={payment.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3 text-xs">{payment.date}</td>
                     <td className="px-4 py-3 font-mono text-xs text-blue-600 font-medium">{payment.id}</td>
-                    <td className="px-4 py-3">{payment.agentPhone}</td>
+                    <td className="px-4 py-3">{getUserName(payment)}</td>
                     <td className="px-4 py-3">{payment.type}</td>
                     <td className="px-4 py-3 font-bold text-slate-800">{formatCurrency(payment.amount)}</td>
                     <td className="px-4 py-3 text-center">

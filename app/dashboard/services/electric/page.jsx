@@ -389,8 +389,6 @@ const ElectricPage = () => {
           {/* Info Banner */}
           {amount && parseFloat(amount) > 0 && (() => {
             const amt = parseFloat(amount);
-            const fee = Math.min((amt * 0.015) + 50, 5000);
-            const total = amt + fee;
             return (
               <>
                 <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-xl space-y-2 text-sm text-slate-700">
@@ -402,10 +400,9 @@ const ElectricPage = () => {
                     <p><span className="font-medium">DISCO:</span> {discos.find((d) => d.id === selectedDisco)?.fullName}</p>
                     <p><span className="font-medium">Meter Number:</span> {meterNumber}</p>
                     <p><span className="font-medium">Original Amount:</span> ₦{amt.toLocaleString()}</p>
-                    <p><span className="font-medium text-slate-500">Transaction Fee (1.5% + ₦50):</span> +₦{fee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     <p className="font-bold text-slate-800 border-t pt-1.5 flex justify-between">
                       <span>Total Debit:</span>
-                      <span>₦{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      <span>₦{amt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </p>
                   </div>
                 </div>
@@ -415,7 +412,7 @@ const ElectricPage = () => {
                   disabled={loading || !verified || !amount || !phoneNumber}
                   className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-4 px-4 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? "Processing Payment..." : `Pay ₦${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  {loading ? "Processing Payment..." : `Pay ₦${amt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 </button>
               </>
             );

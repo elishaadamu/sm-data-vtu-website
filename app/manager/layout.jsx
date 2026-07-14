@@ -16,7 +16,8 @@ import {
   FaSignOutAlt,
   FaBars,
   FaTimes,
-  FaShieldAlt
+  FaShieldAlt,
+  FaBell
 } from "react-icons/fa";
 
 const ManagerLayout = ({ children }) => {
@@ -45,6 +46,7 @@ const ManagerLayout = ({ children }) => {
     { href: "/manager/plans", label: "Manage Plans", icon: FaClipboardList },
     { href: "/manager/orders", label: "Order History", icon: FaHistory },
     { href: "/manager/payments", label: "Payment History", icon: FaMoneyBillWave },
+    { href: "/manager/send-notification", label: "Send Notification", icon: FaBell },
   ];
 
   if (!isClient) return null; // Prevent hydration mismatch
