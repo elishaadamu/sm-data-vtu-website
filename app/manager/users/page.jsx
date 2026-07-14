@@ -346,7 +346,16 @@ export default function ManageUsers() {
                                 setActionMenuOpen(null);
                               } else {
                                 const rect = e.currentTarget.getBoundingClientRect();
-                                setActionMenuPos({ x: rect.right, y: rect.bottom });
+                                const spaceBelow = window.innerHeight - rect.bottom;
+                                const isSuper = managerData?.role === "super" || managerData?.isSuperAdmin;
+                                const menuHeight = isSuper ? 230 : 190;
+                                
+                                let y = rect.bottom + 4;
+                                if (spaceBelow < menuHeight) {
+                                  // Open upwards
+                                  y = rect.top - menuHeight - 4;
+                                }
+                                setActionMenuPos({ x: rect.right, y });
                                 setActionMenuOpen(userId);
                               }
                             }}
@@ -627,7 +636,7 @@ export default function ManageUsers() {
             className="fixed z-[100] w-40 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden py-1"
             style={{
               left: `${actionMenuPos.x - 160}px`,
-              top: `${actionMenuPos.y - 10}px`,
+              top: `${actionMenuPos.y}px`,
             }}
           >
             {(() => {
