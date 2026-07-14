@@ -83,6 +83,10 @@ export const API_CONFIG = {
     NOTIFICATIONS: {
       GET: "/notifications/",                            // append {userId}
     },
+    REFERRALS: {
+      COMMISSIONS: "/wallet/referral-commissions/",  // append {userId}
+      REFERRED_USERS: "/wallet/referred-users/",     // append {userId}
+    },
     ADMIN: {
       DASHBOARD_STATS: "/admin/dashboard/stats/",        // append {adminId}
       DASHBOARD_DAILY: "/admin/dashboard/daily/",        // append {adminId}

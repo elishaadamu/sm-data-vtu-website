@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useAppContext } from "@/context/AppContext";
 import {
   FaGift,
@@ -11,9 +11,12 @@ import {
   FaClock,
   FaInfoCircle,
   FaWhatsapp,
+  FaSpinner,
 } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
+import { apiUrl, API_CONFIG } from "@/configs/api";
 
 const ReferralsPage = () => {
   const { userData } = useAppContext();
@@ -21,6 +24,12 @@ const ReferralsPage = () => {
   const [copiedCode, setCopiedCode] = useState(false);
   const [referralLink, setReferralLink] = useState("");
   const [referralCode, setReferralCode] = useState("");
+
+  // Referral states from APIs
+  const [commissions, setCommissions] = useState([]);
+  const [referredUsers, setReferredUsers] = useState([]);
+  const [totalEarnings, setTotalEarnings] = useState(0);
+  const [loadingData, setLoadingData] = useState(false);
 
   // Deriving referral code and link
   useEffect(() => {
@@ -30,6 +39,43 @@ const ReferralsPage = () => {
       setReferralCode(code);
       setReferralLink(`${window.location.origin}/signup?ref=${code}`);
     }
+  }, [userData]);
+
+  // Fetch and console log referral data
+  useEffect(() => {
+    const fetchReferralData = async () => {
+      const userId = userData?._id || userData?.id;
+      if (!userId) return;
+
+      setLoadingData(true);
+      
+      // Fetch Commissions
+      try {
+        const commissionsRes = await axios.get(apiUrl(API_CONFIG.ENDPOINTS.REFERRALS.COMMISSIONS + userId));
+        console.log("Referral Commissions Response:", commissionsRes.data);
+        const data = commissionsRes.data?.data;
+        const commissionsList = data?.transactions || [];
+        setCommissions(Array.isArray(commissionsList) ? commissionsList : []);
+        setTotalEarnings(data?.summary?.totalEarnings ?? 0);
+      } catch (error) {
+        console.error("Error fetching referral commissions:", error);
+      }
+
+      // Fetch Referred Users
+      try {
+        const referredUsersRes = await axios.get(apiUrl(API_CONFIG.ENDPOINTS.REFERRALS.REFERRED_USERS + userId));
+        console.log("Referred Users Response:", referredUsersRes.data);
+        const data = referredUsersRes.data?.data;
+        const usersList = data?.referredUsers || [];
+        setReferredUsers(Array.isArray(usersList) ? usersList : []);
+      } catch (error) {
+        console.error("Error fetching referred users:", error);
+      }
+
+      setLoadingData(false);
+    };
+
+    fetchReferralData();
   }, [userData]);
 
   const copyToClipboard = (text, isLink = true) => {
@@ -50,8 +96,13 @@ const ReferralsPage = () => {
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
   };
 
+  // Derive dynamic stats
+  const totalCommission = useMemo(() => {
+    if (totalEarnings !== undefined && totalEarnings !== null) return totalEarnings;
+    return commissions.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  }, [commissions, totalEarnings]);
 
-  // Mock list of referrals for rich frontend presentation
+  // Mock list of referrals for rich frontend presentation (only used as fallback or fallback design)
   const mockReferrals = [
     {
       id: "ref1",
@@ -171,9 +222,15 @@ const ReferralsPage = () => {
         <div className="space-y-6">
           {/* Total Referrals Card */}
           <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-md flex items-center justify-between">
-            <div className="space-y-1">
+            <div className="space-y-1 text-left">
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Referred</p>
-              <h3 className="text-3xl font-extrabold text-slate-800">3 Users</h3>
+              <h3 className="text-3xl font-extrabold text-slate-800">
+                {loadingData ? (
+                  <FaSpinner className="animate-spin text-slate-400 text-2xl inline" />
+                ) : (
+                  `${referredUsers.length} User${referredUsers.length !== 1 ? "s" : ""}`
+                )}
+              </h3>
               <p className="text-xs text-slate-500 mt-1">Directly signed up with your link</p>
             </div>
             <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl">
@@ -183,9 +240,15 @@ const ReferralsPage = () => {
 
           {/* Commission Card */}
           <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-md flex items-center justify-between">
-            <div className="space-y-1">
+            <div className="space-y-1 text-left">
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Commission</p>
-              <h3 className="text-3xl font-extrabold text-green-600">₦2,170.50</h3>
+              <h3 className="text-3xl font-extrabold text-green-600">
+                {loadingData ? (
+                  <FaSpinner className="animate-spin text-green-600 text-2xl inline" />
+                ) : (
+                  `₦${totalCommission.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                )}
+              </h3>
               <p className="text-xs text-slate-500 mt-1">Paid directly to your wallet</p>
             </div>
             <div className="p-4 bg-green-50 text-green-600 rounded-2xl">
@@ -252,34 +315,65 @@ const ReferralsPage = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-100">
-              {mockReferrals.map((ref) => (
-                <tr key={ref.id} className="hover:bg-slate-50/50 transition duration-150">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-800">
-                    {ref.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                    {ref.dateJoined}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-green-600">
-                    ₦{ref.commissionEarned.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-medium text-slate-600">
-                    <span className="flex items-center justify-center gap-1">
-                      <FaClock className="w-3.5 h-3.5 text-slate-400" />
-                      {ref.status === "Active" ? `${ref.daysRemaining} days left` : "Ended"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
-                    <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${
-                      ref.status === "Active"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-500"
-                    }`}>
-                      {ref.status}
-                    </span>
+              {loadingData ? (
+                <tr>
+                  <td colSpan="5" className="px-6 py-12 text-center">
+                    <FaSpinner className="animate-spin w-6 h-6 text-blue-500 mx-auto" />
                   </td>
                 </tr>
-              ))}
+              ) : referredUsers.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-6 py-8 text-center text-slate-400 text-sm">
+                    No referred users yet. Share your link to start earning!
+                  </td>
+                </tr>
+              ) : (
+                referredUsers.map((ref, idx) => {
+                  // Find commissions for this user
+                  const userCommissions = commissions.filter(c => 
+                    c.referredUserId === ref._id || 
+                    c.referredUserId === ref.id || 
+                    (c.referredUser && (c.referredUser._id === ref._id || c.referredUser.id === ref.id || c.referredUser === ref._id || c.referredUser === ref.id))
+                  );
+                  const commissionEarned = userCommissions.reduce((sum, c) => sum + (Number(c.amount) || 0), 0);
+                  
+                  // Calculate registration date and days remaining in the 50-day window
+                  const regDate = new Date(ref.createdAt || ref.dateJoined || Date.now());
+                  const diffTime = Date.now() - regDate.getTime();
+                  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                  const daysRemaining = Math.max(0, 50 - diffDays);
+                  const isActive = daysRemaining > 0;
+
+                  return (
+                    <tr key={ref._id || ref.id || idx} className="hover:bg-slate-50/50 transition duration-150">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-800 text-left">
+                        {ref.fullName || `${ref.firstName || ""} ${ref.lastName || ""}`.trim() || ref.username || "Anonymous Friend"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 text-left">
+                        {regDate.toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-green-600">
+                        ₦{commissionEarned.toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-medium text-slate-600">
+                        <span className="flex items-center justify-center gap-1">
+                          <FaClock className="w-3.5 h-3.5 text-slate-400" />
+                          {isActive ? `${daysRemaining} days left` : "Ended"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                        <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${
+                          isActive
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-500"
+                        }`}>
+                          {isActive ? "Active" : "Expired"}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
