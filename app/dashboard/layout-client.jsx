@@ -11,7 +11,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Sidebar from "@/components/dashboard/Sidebar";
 import DateTime from "@/components/DateTime";
-import { FaWifi, FaPhone, FaLightbulb, FaTv } from "react-icons/fa";
+import { FaWifi, FaPhone, FaLightbulb, FaTv, FaWhatsapp } from "react-icons/fa";
 
 const DashboardLayout = ({ children }) => {
   const router = useRouter();
@@ -181,6 +181,20 @@ const DashboardLayout = ({ children }) => {
         </div>
       </div>
 
+      {/* Floating WhatsApp Support Button */}
+      <a
+        href="https://wa.me/2347073775347"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-24 right-6 md:bottom-6 md:right-6 z-40 flex items-center justify-center w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-[0_8px_30px_rgb(16,185,129,0.4)] hover:shadow-[0_8px_30px_rgb(16,185,129,0.6)] transition-all duration-300 hover:scale-110 active:scale-95 group animate-bounce"
+        style={{ animationDuration: "3s" }}
+        title="Chat on WhatsApp"
+      >
+        <FaWhatsapp className="w-8 h-8" />
+        <span className="absolute right-16 bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap shadow-md">
+          WhatsApp Support
+        </span>
+      </a>
 
       <style jsx>{`
         @keyframes slideInRight {

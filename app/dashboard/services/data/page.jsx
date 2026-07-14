@@ -37,6 +37,19 @@ const DataPage = () => {
   const [selectedNetwork, setSelectedNetwork] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [selectedPlanId, setSelectedPlanId] = useState("");
+
+  const formatValidity = (val) => {
+    if (!val) return "";
+    const valStr = String(val).trim();
+    if (
+      valStr.toLowerCase().includes("day") ||
+      valStr.toLowerCase().includes("month") ||
+      valStr.toLowerCase().includes("hour")
+    ) {
+      return valStr;
+    }
+    return `${valStr} days`;
+  };
   // Fetch wallet balance
   useEffect(() => {
     const fetchWalletBalance = async () => {
@@ -330,7 +343,7 @@ const DataPage = () => {
                       key={`${plan.plan_code}-${index}`}
                       value={plan.plan_code}
                     >
-                      {plan.label} - ₦{plan.amount}
+                      {plan.label} - ₦{plan.amount} ({formatValidity(plan.validity)})
                     </option>
                   ))}
                 </select>
@@ -339,18 +352,31 @@ const DataPage = () => {
           )}
 
           {/* Price Display */}
-          {selectedPlanDetails && (
-            <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-md flex justify-between items-center">
-              <div>
-                <p className="font-semibold text-slate-800">
-                  {selectedPlanDetails.label}
-                </p>
+          {selectedPlanDetails && (() => {
+            const amount = selectedPlanDetails.amount;
+            const fee = Math.min((amount * 0.015) + 50, 5000);
+            const total = amount + fee;
+            return (
+              <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-xl space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-slate-600 font-medium">{selectedPlanDetails.label}</span>
+                  <span className="font-bold text-slate-800">₦{amount.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs text-slate-500 border-t border-purple-100 pt-1">
+                  <span>Validity</span>
+                  <span className="font-semibold text-slate-700">{formatValidity(selectedPlanDetails.validity)}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs text-slate-500 border-t border-purple-100 pt-1">
+                  <span>Transaction Charge (1.5% + ₦50)</span>
+                  <span>+₦{fee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex justify-between items-center text-base font-bold text-purple-600 border-t border-purple-200 pt-2">
+                  <span>Total Debit</span>
+                  <span>₦{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
               </div>
-              <p className="text-xl font-bold text-purple-600">
-                ₦{selectedPlanDetails.amount}
-              </p>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Submit Button */}
           <button

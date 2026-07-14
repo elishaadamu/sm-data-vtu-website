@@ -339,14 +339,22 @@ const ServicesLayout = () => {
                       <p className="text-white/90 text-xs mt-0.5">
                         {accountDetails.bankName} • {accountDetails.accountName}
                       </p>
+                      <p className="text-yellow-300 text-[10px] mt-1 font-bold">
+                        Fee: 1.5% + ₦50 (capped at ₦5,000)
+                      </p>
                     </>
                   ) : (
-                    <button
-                      onClick={() => setShowCreateAccount(true)}
-                      className="mt-1 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-md hover:shadow-lg transition duration-200 active:scale-95"
-                    >
-                      Create Virtual Account
-                    </button>
+                    <div className="flex flex-col md:items-end gap-1.5">
+                      <button
+                        onClick={() => setShowCreateAccount(true)}
+                        className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-md hover:shadow-lg transition duration-200 active:scale-95"
+                      >
+                        Create Virtual Account
+                      </button>
+                      <span className="text-blue-100 text-[9px]">
+                        Deposit Fee: 1.5% + ₦50 (max ₦5,000)
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>
@@ -651,7 +659,7 @@ const ServicesLayout = () => {
             </h3>
             <p className="text-gray-600 text-sm mb-6">
               Enter your Bank Verification Number (BVN) to create a virtual account and start receiving
-              payments.
+              payments. Wallet deposits carry a charge of <strong>1.5% + ₦50 (capped at ₦5,000)</strong>.
             </p>
 
             <form onSubmit={handleCreateAccount} className="space-y-4">

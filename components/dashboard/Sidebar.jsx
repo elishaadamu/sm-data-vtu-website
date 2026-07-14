@@ -18,6 +18,7 @@ import {
   FaHistory,
   FaCogs,
   FaSearch,
+  FaGift,
 } from "react-icons/fa";
 import Image from "next/image";
 import Logo from "@/assets/logo/sm-data.png";
@@ -263,6 +264,17 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, handleLogout }) => {
             >
               <FaUser className="w-5 h-5" />
               <span>Personal Details</span>
+            </Link>
+
+            {/* Refer & Earn */}
+            <Link
+              href="/dashboard/referrals"
+              className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg hover:bg-gray-700 transition-colors ${
+                pathname === "/dashboard/referrals" ? "bg-gray-700" : ""
+              }`}
+            >
+              <FaGift className="w-5 h-5 text-yellow-500" />
+              <span>Refer & Earn</span>
             </Link>
 
             {/* Change Pin */}

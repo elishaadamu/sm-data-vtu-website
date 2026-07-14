@@ -387,38 +387,39 @@ const ElectricPage = () => {
 
 
           {/* Info Banner */}
-          {amount && (
-            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-md">
-              <div className="flex items-start gap-3">
-                <FaInfoCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-slate-700">
-                  <p className="font-semibold mb-1">Payment Summary</p>
+          {amount && parseFloat(amount) > 0 && (() => {
+            const amt = parseFloat(amount);
+            const fee = Math.min((amt * 0.015) + 50, 5000);
+            const total = amt + fee;
+            return (
+              <>
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-xl space-y-2 text-sm text-slate-700">
+                  <p className="font-semibold mb-1 flex items-center gap-1.5 text-blue-800">
+                    <FaInfoCircle className="w-4 h-4 text-blue-600" />
+                    Payment Summary
+                  </p>
                   <div className="space-y-1">
-                    <p>
-                      <span className="font-medium">DISCO:</span>{" "}
-                      {discos.find((d) => d.id === selectedDisco)?.fullName}
-                    </p>
-                    <p>
-                      <span className="font-medium">Meter Number:</span>{" "}
-                      {meterNumber}
-                    </p>
-                    <p>
-                      <span className="font-medium">Amount:</span> ₦
-                      {parseFloat(amount || 0).toLocaleString()}
+                    <p><span className="font-medium">DISCO:</span> {discos.find((d) => d.id === selectedDisco)?.fullName}</p>
+                    <p><span className="font-medium">Meter Number:</span> {meterNumber}</p>
+                    <p><span className="font-medium">Original Amount:</span> ₦{amt.toLocaleString()}</p>
+                    <p><span className="font-medium text-slate-500">Transaction Fee (1.5% + ₦50):</span> +₦{fee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <p className="font-bold text-slate-800 border-t pt-1.5 flex justify-between">
+                      <span>Total Debit:</span>
+                      <span>₦{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </p>
                   </div>
                 </div>
-              </div>
-            </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading || !verified || !amount || !phoneNumber}
-            className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-4 px-4 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Processing Payment..." : `Pay ₦${parseFloat(amount || 0).toLocaleString()}`}
-          </button>
+                <button
+                  type="submit"
+                  disabled={loading || !verified || !amount || !phoneNumber}
+                  className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-4 px-4 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Processing Payment..." : `Pay ₦${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                </button>
+              </>
+            );
+          })()}
         </form>
       </div>
 

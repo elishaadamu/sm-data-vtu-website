@@ -914,11 +914,13 @@ const LandingHome = () => {
             <p className="font-semibold text-emerald-900">
               Still have questions?{" "}
               <a
-                href="tel:+2348140950947"
+                href="https://wa.me/2347073775347"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 font-bold underline decoration-emerald-400 decoration-2 underline-offset-4 hover:decoration-emerald-600"
               >
                 <PhoneCall className="h-3.5 w-3.5" />
-                Call our support team
+                Chat with WhatsApp Support
               </a>
             </p>
           </div>
@@ -959,11 +961,13 @@ const LandingHome = () => {
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <a
-              href="tel:+2348140950947"
+              href="https://wa.me/2347073775347"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"
             >
               <PhoneCall className="h-4 w-4" />
-              Call Support
+              WhatsApp Support
             </a>
           </div>
         </div>
@@ -1042,7 +1046,7 @@ const LandingHome = () => {
                   { label: "Sign In", href: "/signin" },
                   { label: "Create Account", href: "/signup" },
                   { label: "Agent Login", href: "/signin" },
-                  { label: "Support", href: "tel:+2348140950947" },
+                  { label: "Support", href: "https://wa.me/2347073775347" },
                 ].map((link) => (
                   <Link
                     key={link.label}

@@ -180,10 +180,12 @@ const Footer = () => {
               <div className="flex items-center gap-3">
                 <FaPhoneAlt className="w-4 h-4 text-blue-400" />
                 <a
-                  href="tel:+2348140950947"
+                  href="https://wa.me/2347073775347"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-gray-300 hover:text-white transition-colors duration-300"
                 >
-                  +234 814 095 0947
+                  +234 707 377 5347 (WhatsApp)
                 </a>
               </div>
 

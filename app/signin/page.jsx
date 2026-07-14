@@ -32,7 +32,6 @@ const page = () => {
     }
 
     const payload = { email, password };
-    console.log("Login Payload:", payload);
     try {
       const response = await axios.post(
         apiUrl(API_CONFIG.ENDPOINTS.AUTH.SIGNIN),
@@ -44,10 +43,7 @@ const page = () => {
       }
 
       // Log the data we're about to save
-      console.log("Data to be saved:", {
-        rawData: response.data,
-      });
-
+    
       const encryptedUser = encryptData(response.data);
 
       if (!encryptedUser) {
@@ -61,7 +57,7 @@ const page = () => {
       toast.success("Signin successful!");
       router.push("/dashboard");
     } catch (error) {
-      console.error("Error signing in:", error);
+      
       toast.error(
         error.response?.data?.message || "An error occurred during signin."
       );
