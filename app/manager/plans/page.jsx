@@ -31,7 +31,8 @@ const emptyForm = {
   planId: "",
   planName: "",
   validity: "",
-  price: "",
+  costPrice: "",
+  sellingPrice: "",
   isActive: true,
 };
 
@@ -68,7 +69,8 @@ const normalizePlan = (plan, index) => {
     planName:
       plan?.planName ?? plan?.plan_name ?? plan?.name ?? plan?.label ?? plan?.data_plan ?? "Data Plan",
     validity: plan?.validity ?? plan?.duration ?? plan?.validity_days ?? "N/A",
-    price: plan?.price ?? plan?.amount ?? plan?.sellingPrice ?? plan?.selling_price ?? "",
+    costPrice: plan?.costPrice ?? plan?.cost_price ?? "",
+    sellingPrice: plan?.sellingPrice ?? plan?.selling_price ?? plan?.price ?? plan?.amount ?? "",
     isActive: plan?.isActive ?? plan?.active ?? true,
   };
 };
@@ -79,7 +81,8 @@ const planPayload = (formData, includeStatus = false) => {
     planId: formData.planId.trim(),
     planName: formData.planName.trim(),
     validity: formData.validity.trim(),
-    price: Number(formData.price),
+    costPrice: Number(formData.costPrice),
+    sellingPrice: Number(formData.sellingPrice),
   };
   if (includeStatus) payload.isActive = Boolean(formData.isActive);
   return payload;
@@ -210,7 +213,7 @@ export default function ManagePlans() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!ensureAdmin()) return;
-    if (!formData.network || !formData.planId || !formData.planName || !formData.validity || !formData.price) {
+    if (!formData.network || !formData.planId || !formData.planName || !formData.validity || formData.costPrice === "" || formData.sellingPrice === "") {
       toast.error("Please fill in all plan fields.");
       return;
     }
@@ -249,7 +252,8 @@ export default function ManagePlans() {
       planId: plan.planId,
       planName: plan.planName,
       validity: plan.validity === "N/A" ? "" : plan.validity,
-      price: plan.price,
+      costPrice: plan.costPrice,
+      sellingPrice: plan.sellingPrice,
       isActive: Boolean(plan.isActive),
     });
     // Scroll to form
@@ -414,12 +418,26 @@ export default function ManagePlans() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Price (₦)</label>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Cost Price (₦)</label>
               <input
                 type="number"
                 min="0"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                step="any"
+                value={formData.costPrice}
+                onChange={(e) => setFormData({ ...formData, costPrice: e.target.value })}
+                placeholder="e.g. 280"
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition-all"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Selling Price (₦)</label>
+              <input
+                type="number"
+                min="0"
+                step="any"
+                value={formData.sellingPrice}
+                onChange={(e) => setFormData({ ...formData, sellingPrice: e.target.value })}
                 placeholder="e.g. 300"
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition-all"
                 required
@@ -540,7 +558,8 @@ export default function ManagePlans() {
                 <th className="px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-slate-50">Plan ID</th>
                 <th className="px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-slate-50">Name</th>
                 <th className="px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-slate-50">Validity</th>
-                <th className="px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-slate-50">Price</th>
+                <th className="px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-slate-50">Cost Price</th>
+                <th className="px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-slate-50">Selling Price</th>
                 <th className="px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider text-center bg-slate-50">Status</th>
                 <th className="px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right bg-slate-50">Actions</th>
               </tr>
@@ -548,7 +567,7 @@ export default function ManagePlans() {
             <tbody className="divide-y divide-slate-100">
               {normalizedPlans.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-16 text-center">
+                  <td colSpan="8" className="px-6 py-16 text-center">
                     {loading ? (
                       <div className="flex flex-col items-center gap-3">
                         <FaSpinner className="animate-spin text-slate-300 w-8 h-8" />
@@ -580,8 +599,11 @@ export default function ManagePlans() {
                     <td className="px-5 py-4 text-slate-500">
                       {plan.validity}{plan.validity !== "N/A" && " days"}
                     </td>
+                    <td className="px-5 py-4 text-slate-500 font-medium">
+                      {plan.costPrice ? formatCurrency(plan.costPrice) : "₦0.00"}
+                    </td>
                     <td className="px-5 py-4">
-                      <span className="font-bold text-blue-600">{formatCurrency(plan.price)}</span>
+                      <span className="font-bold text-blue-600">{formatCurrency(plan.sellingPrice)}</span>
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex justify-center">
@@ -701,7 +723,7 @@ export default function ManagePlans() {
             <p className="text-slate-700 font-medium mb-1">Are you sure you want to delete</p>
             <p className="text-lg font-bold text-slate-900 mb-1">{deleteTarget.planName}</p>
             <p className="text-xs text-slate-400 mb-6">
-              {deleteTarget.network} · {formatCurrency(deleteTarget.price)} · {deleteTarget.validity} days
+              {deleteTarget.network} · Cost: {formatCurrency(deleteTarget.costPrice)} · Sale: {formatCurrency(deleteTarget.sellingPrice)} · {deleteTarget.validity} days
             </p>
             <div className="flex gap-3">
               <button

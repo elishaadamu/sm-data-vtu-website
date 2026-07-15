@@ -100,7 +100,7 @@ const DataPage = () => {
               ...p,
               plan_code: p.planId || p.plan_code || "",
               label: p.planName || p.label || "Data Plan",
-              amount: p.price ?? p.amount ?? 0,
+              amount: p.sellingPrice ?? p.price ?? p.amount ?? 0,
               validity: p.validity || "30",
             }));
           setPlans(formattedPlans);

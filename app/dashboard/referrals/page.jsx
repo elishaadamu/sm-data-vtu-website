@@ -329,20 +329,25 @@ const ReferralsPage = () => {
                 </tr>
               ) : (
                 referredUsers.map((ref, idx) => {
-                  // Find commissions for this user
-                  const userCommissions = commissions.filter(c => 
-                    c.referredUserId === ref._id || 
-                    c.referredUserId === ref.id || 
-                    (c.referredUser && (c.referredUser._id === ref._id || c.referredUser.id === ref.id || c.referredUser === ref._id || c.referredUser === ref.id))
-                  );
-                  const commissionEarned = userCommissions.reduce((sum, c) => sum + (Number(c.amount) || 0), 0);
-                  
                   // Calculate registration date and days remaining in the 50-day window
-                  const regDate = new Date(ref.createdAt || ref.dateJoined || Date.now());
+                  const regDate = new Date(ref.joinedDate || ref.createdAt || ref.dateJoined || Date.now());
                   const diffTime = Date.now() - regDate.getTime();
                   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                   const daysRemaining = Math.max(0, 50 - diffDays);
                   const isActive = daysRemaining > 0;
+
+                  // Find commission earned (prioritize backend pre-calculated total)
+                  let commissionEarned = 0;
+                  if (ref.commission && typeof ref.commission.total === "number") {
+                    commissionEarned = ref.commission.total;
+                  } else {
+                    const userCommissions = commissions.filter(c => 
+                      c.referredUserId === ref._id || 
+                      c.referredUserId === ref.id || 
+                      (c.referredUser && (c.referredUser._id === ref._id || c.referredUser.id === ref.id || c.referredUser === ref._id || c.referredUser === ref.id))
+                    );
+                    commissionEarned = userCommissions.reduce((sum, c) => sum + (Number(c.amount) || 0), 0);
+                  }
 
                   return (
                     <tr key={ref._id || ref.id || idx} className="hover:bg-slate-50/50 transition duration-150">
