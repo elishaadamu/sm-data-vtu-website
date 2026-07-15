@@ -91,6 +91,9 @@ export const API_CONFIG = {
       DASHBOARD_STATS: "/admin/dashboard/stats/",        // append {adminId}
       DASHBOARD_DAILY: "/admin/dashboard/daily/",        // append {adminId}
       DASHBOARD_WEEKLY: "/admin/dashboard/weekly/",      // append {adminId}
+      PROFIT_DAILY: "/admin/dashboard/profit/daily/",      // append {adminUserId}
+      PROFIT_WEEKLY: "/admin/dashboard/profit/weekly/",    // append {adminUserId}
+      PROFIT_MONTHLY: "/admin/dashboard/profit/monthly/",  // append {adminUserId}
       USERS: "/admin/users/",                            // append {adminUserId}
       USER_STATS: "/admin/users/",                       // append {userId}/stats/{adminUserId}
       UPDATE_USER: "/admin/updateUser/",                 // append {adminUserId}, PUT
