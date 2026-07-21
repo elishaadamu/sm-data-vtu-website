@@ -85,9 +85,9 @@ const planPayload = (formData, includeStatus = false) => {
     sellingPrice: Number(formData.sellingPrice),
   };
   if (includeStatus) payload.isActive = Boolean(formData.isActive);
+  console.log("📦 Payload:", payload); // Add this line
   return payload;
 };
-
 // ── Toggle Switch ──────────────────────────────────────────────────────────────
 const ToggleSwitch = ({ checked, onChange, disabled, label }) => (
   <button
