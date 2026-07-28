@@ -897,7 +897,7 @@ const LandingHome = () => {
                     />
                   </div>
                   <p className="mt-4 text-xs font-medium text-slate-300">
-                    Point your mobile phone camera at the QR code to open the download link.
+                    Point your phone camera at the QR code to download SM-DATA.apk directly from smdata.com.ng
                   </p>
                 </div>
 
