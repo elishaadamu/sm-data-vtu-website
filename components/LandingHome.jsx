@@ -855,39 +855,19 @@ const LandingHome = () => {
                   <Download className="h-5 w-5" />
                   <span>Download APK (Direct)</span>
                 </a>
-
-                {/* QR Code Scan Card */}
-                <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-3.5 border border-white/10 backdrop-blur-md">
-                  <div className="relative h-14 w-14 overflow-hidden rounded-xl bg-white p-1 shadow-md shrink-0">
-                    <Image
-                      src="/qr-code.png"
-                      alt="Scan QR Code to Download SM Data App"
-                      width={56}
-                      height={56}
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-white flex items-center gap-1">
-                      <QrCode className="h-3.5 w-3.5 text-emerald-400" />
-                      Scan to Download
-                    </p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Use camera to install APK</p>
-                  </div>
-                </div>
               </div>
 
               {/* Installation steps */}
               <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-white/10 pt-8">
                 <div className="flex flex-col gap-1">
                   <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Step 1</span>
-                  <span className="text-sm font-semibold text-white">Download APK</span>
-                  <span className="text-xs text-slate-400">Click the download button above to get SM-DATA.apk</span>
+                  <span className="text-sm font-semibold text-white">Download / Scan QR</span>
+                  <span className="text-xs text-slate-400">Click download or scan the QR code</span>
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Step 2</span>
                   <span className="text-sm font-semibold text-white">Install App</span>
-                  <span className="text-xs text-slate-400">Open the downloaded file & confirm installation</span>
+                  <span className="text-xs text-slate-400">Open the file & confirm installation</span>
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Step 3</span>
@@ -897,57 +877,38 @@ const LandingHome = () => {
               </div>
             </div>
 
-            {/* App Card Preview */}
-            <div className="flex justify-center">
-              <div className="relative w-full max-w-sm rounded-[32px] border border-emerald-500/20 bg-slate-900/90 p-6 shadow-2xl backdrop-blur-xl">
-                <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400">
-                      <Smartphone className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-white">SM Data App</p>
-                      <p className="text-xs text-slate-400">Android Application</p>
-                    </div>
-                  </div>
-                  <span className="rounded-full bg-emerald-500/20 px-2.5 py-1 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
-                    APK v1.0
-                  </span>
+            {/* Large Scannable QR Code Card */}
+            <div className="flex flex-col items-center justify-center">
+              <div className="relative w-full max-w-sm rounded-[32px] border border-emerald-500/30 bg-slate-900/90 p-7 shadow-2xl backdrop-blur-xl text-center">
+                <div className="flex items-center justify-center gap-2 border-b border-white/10 pb-4">
+                  <QrCode className="h-5 w-5 text-emerald-400" />
+                  <h3 className="text-base font-bold text-white">Scan to Download App</h3>
                 </div>
 
-                <div className="mt-6 space-y-4">
-                  <div className="rounded-xl bg-white/5 p-4 border border-white/5">
-                    <p className="text-xs text-emerald-400 font-semibold uppercase tracking-wider">Fast & Secure</p>
-                    <p className="text-base font-bold text-white mt-1">Instant Data & Airtime Recharge</p>
-                    <p className="text-xs text-slate-400 mt-1">Lightweight Android APK for all smartphones.</p>
+                <div className="my-6 flex flex-col items-center justify-center">
+                  <div className="relative rounded-2xl bg-white p-3.5 shadow-2xl ring-4 ring-emerald-500/20">
+                    <Image
+                      src="/qr-code.png"
+                      alt="Scan QR Code to Download SM Data APK"
+                      width={220}
+                      height={220}
+                      className="h-48 w-48 sm:h-56 sm:w-56 object-contain rounded-lg"
+                      priority
+                    />
                   </div>
-
-                  <div className="space-y-2 text-xs text-slate-300">
-                    <div className="flex justify-between py-1 border-b border-white/5">
-                      <span className="text-slate-400">File Name:</span>
-                      <span className="font-medium text-white">SM-DATA.apk</span>
-                    </div>
-                    <div className="flex justify-between py-1 border-b border-white/5">
-                      <span className="text-slate-400">Target OS:</span>
-                      <span className="font-medium text-white">Android 7.0+</span>
-                    </div>
-                    <div className="flex justify-between py-1">
-                      <span className="text-slate-400">Security Status:</span>
-                      <span className="font-semibold text-emerald-400 flex items-center gap-1">
-                        <CheckCircle2 className="h-3 w-3" /> Verified Safe
-                      </span>
-                    </div>
-                  </div>
-
-                  <a
-                    href="/SM-DATA.apk"
-                    download="SM-DATA.apk"
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3.5 text-sm font-bold text-slate-950 transition hover:bg-emerald-400 shadow-lg shadow-emerald-500/20"
-                  >
-                    <Download className="h-4 w-4" />
-                    Download APK File
-                  </a>
+                  <p className="mt-4 text-xs font-medium text-slate-300">
+                    Point your mobile phone camera at the QR code to open the download link.
+                  </p>
                 </div>
+
+                <a
+                  href="/SM-DATA.apk"
+                  download="SM-DATA.apk"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3.5 text-sm font-bold text-slate-950 transition hover:bg-emerald-400 shadow-lg shadow-emerald-500/20"
+                >
+                  <Download className="h-4 w-4" />
+                  Download APK Directly
+                </a>
               </div>
             </div>
           </div>
