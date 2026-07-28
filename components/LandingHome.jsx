@@ -199,11 +199,10 @@ const FAQItem = ({ faq, index }) => {
 
   return (
     <div
-      className={`group rounded-2xl border transition-all duration-300 ${
-        open
+      className={`group rounded-2xl border transition-all duration-300 ${open
           ? "border-emerald-200 bg-emerald-50/50 shadow-lg shadow-emerald-500/5"
           : "border-slate-200/80 bg-white hover:border-slate-300"
-      }`}
+        }`}
     >
       <button
         onClick={() => setOpen(!open)}
@@ -213,19 +212,17 @@ const FAQItem = ({ faq, index }) => {
           {faq.question}
         </span>
         <div
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
-            open
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${open
               ? "rotate-180 bg-emerald-600 text-white"
               : "bg-slate-100 text-slate-500"
-          }`}
+            }`}
         >
           <ChevronDown className="h-4 w-4" />
         </div>
       </button>
       <div
-        className={`overflow-hidden transition-all duration-300 ${
-          open ? "max-h-60 pb-5" : "max-h-0"
-        }`}
+        className={`overflow-hidden transition-all duration-300 ${open ? "max-h-60 pb-5" : "max-h-0"
+          }`}
       >
         <p className="px-6 text-sm leading-relaxed text-slate-600">
           {faq.answer}
@@ -258,13 +255,12 @@ const LandingHome = () => {
     <main className="min-h-screen bg-[#fafbfc] text-slate-900">
       {/* ═══ HEADER ═══ */}
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          scrolled
+        className={`sticky top-0 z-50 transition-all duration-300 ${scrolled
             ? "border-b border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-xl"
             : "bg-transparent"
-        }`}
+          }`}
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5 sm:px-10 lg:px-16">
           <Link href="/" className="flex items-center gap-2 sm:gap-3">
             <Image
               src={Logo}
@@ -319,7 +315,7 @@ const LandingHome = () => {
             <a
               href="/SM-DATA.apk"
               download="SM-DATA.apk"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-600/30 bg-emerald-50 px-3 py-2 text-xs sm:text-sm font-semibold text-emerald-700 hover:bg-emerald-100 hover:border-emerald-500 transition-all shadow-sm"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-emerald-600/30 bg-emerald-50 px-3 py-2 text-xs sm:text-sm font-semibold text-emerald-700 hover:bg-emerald-100 hover:border-emerald-500 transition-all shadow-sm"
             >
               <Download className="h-4 w-4 text-emerald-600" />
               <span>Download App</span>
@@ -356,15 +352,6 @@ const LandingHome = () => {
         {mobileMenuOpen && (
           <div className="border-t border-slate-200/60 bg-white/95 backdrop-blur-xl md:hidden">
             <nav className="flex flex-col gap-1 px-4 py-3">
-              <a
-                href="/SM-DATA.apk"
-                download="SM-DATA.apk"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-600/20"
-              >
-                <Download className="h-4 w-4" />
-                Download Android App (APK)
-              </a>
               {["Services", "Why SM Data", "Mobile App", "Reviews", "FAQ"].map((item) => (
                 <a
                   key={item}
@@ -375,6 +362,24 @@ const LandingHome = () => {
                   {item}
                 </a>
               ))}
+              <div className="mt-2 pt-2 border-t border-slate-100 flex flex-col gap-2">
+                <Link
+                  href="/signin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-lg px-4 py-2 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Sign in
+                </Link>
+                <a
+                  href="/SM-DATA.apk"
+                  download="SM-DATA.apk"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-600/20"
+                >
+                  <Download className="h-4 w-4" />
+                  Download Android App (APK)
+                </a>
+              </div>
             </nav>
           </div>
         )}
@@ -392,19 +397,18 @@ const LandingHome = () => {
           <div className="absolute bottom-0 right-1/4 h-40 w-40 rounded-full bg-emerald-300/10 blur-2xl" />
         </div>
 
-        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 pb-16 pt-10 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:pb-24 lg:pt-16">
+        <div className="relative mx-auto grid max-w-7xl gap-12 px-6 pb-24 pt-16 sm:px-10 lg:grid-cols-2 lg:gap-20 lg:px-16 lg:pb-36 lg:pt-24">
           {/* Left column – text */}
           <div
-            className={`flex flex-col justify-center ${
-              heroVisible ? "animate-slide-in-left" : "opacity-0"
-            }`}
+            className={`flex flex-col justify-center ${heroVisible ? "animate-slide-in-left" : "opacity-0"
+              }`}
           >
-            <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200/80 bg-emerald-50/80 px-4 py-1.5 text-sm font-medium text-emerald-800 backdrop-blur-sm">
+            <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200/80 bg-emerald-50/80 px-4 py-2 text-sm font-medium text-emerald-800 backdrop-blur-sm">
               <Sparkles className="h-4 w-4 text-emerald-600" />
               Nigeria's trusted VTU platform
             </div>
 
-            <h1 className="max-w-xl text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-950 sm:text-5xl lg:text-[3.4rem]">
+            <h1 className="max-w-xl text-4xl font-extrabold leading-[1.15] tracking-tight text-slate-950 sm:text-5xl lg:text-[3.6rem]">
               Buy Data, Airtime &{" "}
               <span className="gradient-text">Pay Bills</span> Instantly
             </h1>
@@ -415,32 +419,24 @@ const LandingHome = () => {
               utilities — all from one powerful platform.
             </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <a
-                href="/SM-DATA.apk"
-                download="SM-DATA.apk"
-                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-7 py-3.5 text-sm font-semibold text-white shadow-xl shadow-emerald-600/25 transition-all hover:bg-emerald-700 hover:-translate-y-0.5"
-              >
-                <Download className="h-4 w-4" />
-                Download Android App
-              </a>
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
               <Link
                 href="/signup"
-                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-7 py-3.5 text-sm font-semibold text-white shadow-xl shadow-slate-900/20 transition-all hover:bg-slate-800 hover:-translate-y-0.5"
+                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-slate-900/20 transition-all hover:bg-slate-800 hover:-translate-y-0.5"
               >
                 Create Free Account
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
                 href="/signin"
-                className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-7 py-3.5 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
+                className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-8 py-4 text-base font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
               >
                 Sign In
               </Link>
             </div>
 
             {/* Stats row */}
-            <div className="mt-12 grid max-w-lg grid-cols-4 gap-4">
+            <div className="mt-14 grid max-w-lg grid-cols-4 gap-4">
               {stats.map((item, i) => {
                 const Icon = item.icon;
                 return (
@@ -462,9 +458,8 @@ const LandingHome = () => {
 
           {/* Right column – Hero image with logos */}
           <div
-            className={`relative flex items-center justify-center ${
-              heroVisible ? "animate-slide-in-right" : "opacity-0"
-            }`}
+            className={`relative flex items-center justify-center ${heroVisible ? "animate-slide-in-right" : "opacity-0"
+              }`}
           >
             {/* Main image container */}
             <div className="relative w-full max-w-lg">
@@ -605,9 +600,8 @@ const LandingHome = () => {
       <section id="services" className="bg-[#fafbfc] py-20 sm:py-24" ref={servicesRef}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div
-            className={`flex flex-col justify-between gap-4 md:flex-row md:items-end ${
-              servicesVisible ? "animate-slide-up" : "opacity-0"
-            }`}
+            className={`flex flex-col justify-between gap-4 md:flex-row md:items-end ${servicesVisible ? "animate-slide-up" : "opacity-0"
+              }`}
           >
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-700">
@@ -639,11 +633,10 @@ const LandingHome = () => {
                 <Link
                   href={service.href}
                   key={service.title}
-                  className={`group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl ${service.bgGlow} ${
-                    servicesVisible
+                  className={`group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl ${service.bgGlow} ${servicesVisible
                       ? "animate-scale-in"
                       : "opacity-0"
-                  }`}
+                    }`}
                   style={{ animationDelay: `${i * 100}ms` }}
                 >
                   {/* Gradient orb */}
@@ -679,9 +672,8 @@ const LandingHome = () => {
       <section id="why-us" className="bg-white py-20 sm:py-24" ref={whyRef}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div
-            className={`grid gap-12 lg:grid-cols-2 ${
-              whyVisible ? "animate-slide-up" : "opacity-0"
-            }`}
+            className={`grid gap-12 lg:grid-cols-2 ${whyVisible ? "animate-slide-up" : "opacity-0"
+              }`}
           >
             {/* Left – content */}
             <div className="flex flex-col justify-center">
@@ -838,9 +830,8 @@ const LandingHome = () => {
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div
-            className={`grid items-center gap-12 lg:grid-cols-2 ${
-              appVisible ? "animate-slide-up" : "opacity-0"
-            }`}
+            className={`grid items-center gap-12 lg:grid-cols-2 ${appVisible ? "animate-slide-up" : "opacity-0"
+              }`}
           >
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-400">
@@ -950,9 +941,8 @@ const LandingHome = () => {
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div
-            className={`text-center ${
-              testimonialsVisible ? "animate-slide-up" : "opacity-0"
-            }`}
+            className={`text-center ${testimonialsVisible ? "animate-slide-up" : "opacity-0"
+              }`}
           >
             <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-700">
               <Star className="h-3 w-3" />
@@ -972,9 +962,8 @@ const LandingHome = () => {
             {testimonials.map((t, i) => (
               <div
                 key={t.name}
-                className={`group rounded-2xl border border-slate-200/80 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-emerald-200 ${
-                  testimonialsVisible ? "animate-scale-in" : "opacity-0"
-                }`}
+                className={`group rounded-2xl border border-slate-200/80 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-emerald-200 ${testimonialsVisible ? "animate-scale-in" : "opacity-0"
+                  }`}
                 style={{ animationDelay: `${i * 150}ms` }}
               >
                 {/* Stars */}
@@ -1028,9 +1017,8 @@ const LandingHome = () => {
       <section id="faq" className="bg-white py-20 sm:py-24" ref={faqRef}>
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div
-            className={`text-center ${
-              faqVisible ? "animate-slide-up" : "opacity-0"
-            }`}
+            className={`text-center ${faqVisible ? "animate-slide-up" : "opacity-0"
+              }`}
           >
             <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-700">
               <BadgeCheck className="h-3 w-3" />
@@ -1046,9 +1034,8 @@ const LandingHome = () => {
           </div>
 
           <div
-            className={`mt-12 space-y-3 ${
-              faqVisible ? "animate-fade-in delay-300" : "opacity-0"
-            }`}
+            className={`mt-12 space-y-3 ${faqVisible ? "animate-fade-in delay-300" : "opacity-0"
+              }`}
           >
             {faqs.map((faq, index) => (
               <FAQItem key={index} faq={faq} index={index} />
