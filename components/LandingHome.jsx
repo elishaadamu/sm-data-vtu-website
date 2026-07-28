@@ -34,6 +34,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Globe,
+  QrCode,
 } from "lucide-react";
 
 /* ─── Data ────────────────────────────────────────────── */
@@ -845,7 +846,7 @@ const LandingHome = () => {
                 Enjoy instant VTU purchases, push notifications, offline PIN access, and a faster mobile experience right on your Android phone.
               </p>
 
-              <div className="mt-8 flex flex-col sm:flex-row gap-4">
+              <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
                 <a
                   href="/SM-DATA.apk"
                   download="SM-DATA.apk"
@@ -854,6 +855,26 @@ const LandingHome = () => {
                   <Download className="h-5 w-5" />
                   <span>Download APK (Direct)</span>
                 </a>
+
+                {/* QR Code Scan Card */}
+                <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-3.5 border border-white/10 backdrop-blur-md">
+                  <div className="relative h-14 w-14 overflow-hidden rounded-xl bg-white p-1 shadow-md shrink-0">
+                    <Image
+                      src="/qr-code.png"
+                      alt="Scan QR Code to Download SM Data App"
+                      width={56}
+                      height={56}
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white flex items-center gap-1">
+                      <QrCode className="h-3.5 w-3.5 text-emerald-400" />
+                      Scan to Download
+                    </p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Use camera to install APK</p>
+                  </div>
+                </div>
               </div>
 
               {/* Installation steps */}
