@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Clock3,
   CreditCard,
+  Download,
   Headphones,
   Landmark,
   Menu,
@@ -243,6 +244,7 @@ const LandingHome = () => {
   const [heroRef, heroVisible] = useInView(0.1);
   const [servicesRef, servicesVisible] = useInView();
   const [whyRef, whyVisible] = useInView();
+  const [appRef, appVisible] = useInView();
   const [testimonialsRef, testimonialsVisible] = useInView();
   const [faqRef, faqVisible] = useInView();
 
@@ -294,6 +296,12 @@ const LandingHome = () => {
               Why SM Data
             </a>
             <a
+              href="#download-app"
+              className="transition-colors hover:text-emerald-600 font-semibold text-emerald-700"
+            >
+              Mobile App
+            </a>
+            <a
               href="#testimonials"
               className="transition-colors hover:text-emerald-600"
             >
@@ -308,6 +316,14 @@ const LandingHome = () => {
           </nav>
 
           <div className="flex items-center gap-3">
+            <a
+              href="/SM-DATA.apk"
+              download="SM-DATA.apk"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-600/30 bg-emerald-50 px-3 py-2 text-xs sm:text-sm font-semibold text-emerald-700 hover:bg-emerald-100 hover:border-emerald-500 transition-all shadow-sm"
+            >
+              <Download className="h-4 w-4 text-emerald-600" />
+              <span>Download App</span>
+            </a>
             <Link
               href="/signin"
               className="hidden rounded-xl px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:inline-flex"
@@ -340,7 +356,16 @@ const LandingHome = () => {
         {mobileMenuOpen && (
           <div className="border-t border-slate-200/60 bg-white/95 backdrop-blur-xl md:hidden">
             <nav className="flex flex-col gap-1 px-4 py-3">
-              {["Services", "Why SM Data", "Reviews", "FAQ"].map((item) => (
+              <a
+                href="/SM-DATA.apk"
+                download="SM-DATA.apk"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-600/20"
+              >
+                <Download className="h-4 w-4" />
+                Download Android App (APK)
+              </a>
+              {["Services", "Why SM Data", "Mobile App", "Reviews", "FAQ"].map((item) => (
                 <a
                   key={item}
                   href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
@@ -390,7 +415,15 @@ const LandingHome = () => {
               utilities — all from one powerful platform.
             </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <a
+                href="/SM-DATA.apk"
+                download="SM-DATA.apk"
+                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-7 py-3.5 text-sm font-semibold text-white shadow-xl shadow-emerald-600/25 transition-all hover:bg-emerald-700 hover:-translate-y-0.5"
+              >
+                <Download className="h-4 w-4" />
+                Download Android App
+              </a>
               <Link
                 href="/signup"
                 className="group inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-7 py-3.5 text-sm font-semibold text-white shadow-xl shadow-slate-900/20 transition-all hover:bg-slate-800 hover:-translate-y-0.5"
@@ -402,7 +435,7 @@ const LandingHome = () => {
                 href="/signin"
                 className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-7 py-3.5 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
               >
-                Sign In to Dashboard
+                Sign In
               </Link>
             </div>
 
@@ -797,6 +830,118 @@ const LandingHome = () => {
         </div>
       </section>
 
+      {/* ═══ MOBILE APP DOWNLOAD ═══ */}
+      <section
+        id="download-app"
+        ref={appRef}
+        className="bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-950 py-20 text-white sm:py-24"
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div
+            className={`grid items-center gap-12 lg:grid-cols-2 ${
+              appVisible ? "animate-slide-up" : "opacity-0"
+            }`}
+          >
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-400">
+                <Smartphone className="h-3.5 w-3.5" />
+                Official Mobile App
+              </div>
+              <h2 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+                Download the <span className="gradient-text">SM Data Mobile App</span>
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-slate-300 sm:text-lg">
+                Enjoy instant VTU purchases, push notifications, offline PIN access, and a faster mobile experience right on your Android phone.
+              </p>
+
+              <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                <a
+                  href="/SM-DATA.apk"
+                  download="SM-DATA.apk"
+                  className="group inline-flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 px-8 py-4 text-base font-bold text-slate-950 shadow-xl shadow-emerald-500/25 transition-all hover:shadow-2xl hover:shadow-emerald-500/40 hover:-translate-y-0.5"
+                >
+                  <Download className="h-5 w-5" />
+                  <span>Download APK (Direct)</span>
+                </a>
+              </div>
+
+              {/* Installation steps */}
+              <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-white/10 pt-8">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Step 1</span>
+                  <span className="text-sm font-semibold text-white">Download APK</span>
+                  <span className="text-xs text-slate-400">Click the download button above to get SM-DATA.apk</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Step 2</span>
+                  <span className="text-sm font-semibold text-white">Install App</span>
+                  <span className="text-xs text-slate-400">Open the downloaded file & confirm installation</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Step 3</span>
+                  <span className="text-sm font-semibold text-white">Sign In & Use</span>
+                  <span className="text-xs text-slate-400">Access your account and buy data on the go</span>
+                </div>
+              </div>
+            </div>
+
+            {/* App Card Preview */}
+            <div className="flex justify-center">
+              <div className="relative w-full max-w-sm rounded-[32px] border border-emerald-500/20 bg-slate-900/90 p-6 shadow-2xl backdrop-blur-xl">
+                <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400">
+                      <Smartphone className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white">SM Data App</p>
+                      <p className="text-xs text-slate-400">Android Application</p>
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-emerald-500/20 px-2.5 py-1 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                    APK v1.0
+                  </span>
+                </div>
+
+                <div className="mt-6 space-y-4">
+                  <div className="rounded-xl bg-white/5 p-4 border border-white/5">
+                    <p className="text-xs text-emerald-400 font-semibold uppercase tracking-wider">Fast & Secure</p>
+                    <p className="text-base font-bold text-white mt-1">Instant Data & Airtime Recharge</p>
+                    <p className="text-xs text-slate-400 mt-1">Lightweight Android APK for all smartphones.</p>
+                  </div>
+
+                  <div className="space-y-2 text-xs text-slate-300">
+                    <div className="flex justify-between py-1 border-b border-white/5">
+                      <span className="text-slate-400">File Name:</span>
+                      <span className="font-medium text-white">SM-DATA.apk</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-white/5">
+                      <span className="text-slate-400">Target OS:</span>
+                      <span className="font-medium text-white">Android 7.0+</span>
+                    </div>
+                    <div className="flex justify-between py-1">
+                      <span className="text-slate-400">Security Status:</span>
+                      <span className="font-semibold text-emerald-400 flex items-center gap-1">
+                        <CheckCircle2 className="h-3 w-3" /> Verified Safe
+                      </span>
+                    </div>
+                  </div>
+
+                  <a
+                    href="/SM-DATA.apk"
+                    download="SM-DATA.apk"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3.5 text-sm font-bold text-slate-950 transition hover:bg-emerald-400 shadow-lg shadow-emerald-500/20"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download APK File
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ═══ TESTIMONIALS ═══ */}
       <section
         id="testimonials"
@@ -1022,18 +1167,31 @@ const LandingHome = () => {
               <h4 className="text-sm font-bold text-slate-950">Quick Links</h4>
               <nav className="mt-4 flex flex-col gap-2.5">
                 {[
+                  { label: "Download Mobile App", href: "/SM-DATA.apk", isDownload: true },
                   { label: "Buy Data", href: "/signin" },
                   { label: "Buy Airtime", href: "/signin" },
                   { label: "Pay Bills", href: "/signin" },
                   { label: "BVN / NIN", href: "/signin" },
                 ].map((link) => (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    className="text-sm text-slate-500 transition hover:text-emerald-600"
-                  >
-                    {link.label}
-                  </Link>
+                  link.isDownload ? (
+                    <a
+                      key={link.label}
+                      href={link.href}
+                      download="SM-DATA.apk"
+                      className="text-sm font-semibold text-emerald-600 transition hover:text-emerald-700 flex items-center gap-1"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      key={link.label}
+                      href={link.href}
+                      className="text-sm text-slate-500 transition hover:text-emerald-600"
+                    >
+                      {link.label}
+                    </Link>
+                  )
                 ))}
               </nav>
             </div>
