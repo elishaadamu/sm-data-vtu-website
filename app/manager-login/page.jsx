@@ -2,9 +2,9 @@
 import Image from "next/image";
 import Logo from "@/assets/logo/sm-data.png";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { encryptData } from "@/lib/encryption";
+import { encryptData, decryptData } from "@/lib/encryption";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaEye, FaEyeSlash, FaShieldAlt } from "react-icons/fa";
@@ -15,11 +15,41 @@ import { useAppContext } from "@/context/AppContext";
 
 const ManagerLogin = () => {
   const router = useRouter();
-  const { fetchManagerData } = useAppContext();
+  const { fetchManagerData, fetchUserData } = useAppContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const checkExistingSession = () => {
+      const managerUser = localStorage.getItem("manager_user");
+      if (managerUser) {
+        router.push("/manager");
+        return;
+      }
+      const user = localStorage.getItem("user");
+      if (user) {
+        try {
+          const decrypted = decryptData(user);
+          const role = (decrypted?.role || "").toLowerCase();
+          const isAdminOrManager =
+            role === "admin" ||
+            role === "manager" ||
+            role === "super-admin" ||
+            role === "super" ||
+            !!decrypted?.isAdmin ||
+            !!decrypted?.isSuperAdmin;
+          if (isAdminOrManager) {
+            router.push("/manager");
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+    };
+    checkExistingSession();
+  }, [router]);
 
   const handleSignin = async (e) => {
     e.preventDefault();
@@ -31,24 +61,31 @@ const ManagerLogin = () => {
         apiUrl(API_CONFIG.ENDPOINTS.AUTH.SIGNIN),
         payload
       );
-      console.log(response.data);
       if (!response.data) {
         throw new Error("No data received from server");
       }
 
       const userData = response.data;
+      const role = (userData.role || "").toLowerCase();
+      const isAdminOrManager =
+        role === "admin" ||
+        role === "manager" ||
+        role === "super-admin" ||
+        role === "super" ||
+        !!userData.isAdmin ||
+        !!userData.isSuperAdmin;
 
       // Ensure that only admins or managers can login here
-      if (userData.role !== "admin" && userData.role !== "manager" && userData.role !== "super-admin") {
+      if (!isAdminOrManager) {
         setLoading(false);
         Swal.fire({
           title: "Access Denied",
-          text: "You are not an administrator. Please log in through the regular user portal.",
+          text: "You are not an administrator. Please log in through the main signin page.",
           icon: "error",
           showCancelButton: true,
           confirmButtonColor: "#3085d6",
           cancelButtonColor: "#d33",
-          confirmButtonText: "Go to User Login",
+          confirmButtonText: "Go to Sign In Page",
           cancelButtonText: "Cancel"
         }).then((result) => {
           if (result.isConfirmed) {
@@ -61,7 +98,9 @@ const ManagerLogin = () => {
       // Valid admin -> Encrypt and save session
       const encryptedAdmin = encryptData(userData);
       localStorage.setItem("manager_user", encryptedAdmin);
+      localStorage.setItem("user", encryptedAdmin);
       fetchManagerData();
+      fetchUserData();
       toast.success(`Welcome back, ${userData.firstName || userData.fullName || 'Administrator'}!`);
       
       router.push("/manager");

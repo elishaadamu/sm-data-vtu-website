@@ -82,6 +82,9 @@ export const API_CONFIG = {
     },
     NOTIFICATIONS: {
       GET: "/notifications/",                            // append {userId}
+      GET_ADMIN: "/notifications/admin/",                 // append {adminUserId}
+      READ: "/notifications/",                            // append {notificationId}/mark-read/{userId}, POST
+      DELETE: "/notifications/",                          // append {notificationId}/{adminUserId}, DELETE
     },
     REFERRALS: {
       COMMISSIONS: "/wallet/referral-commissions/",  // append {userId}

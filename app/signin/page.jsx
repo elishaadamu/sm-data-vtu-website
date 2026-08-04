@@ -6,7 +6,7 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { encryptData } from "@/lib/encryption";
+import { encryptData, decryptData } from "@/lib/encryption";
 import { apiUrl, API_CONFIG } from "@/configs/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -15,11 +15,44 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const page = () => {
   const router = useRouter();
-  const { fetchUserData } = useAppContext();
+  const { fetchUserData, fetchManagerData } = useAppContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const checkExistingSession = () => {
+      const managerUser = localStorage.getItem("manager_user");
+      if (managerUser) {
+        router.push("/manager");
+        return;
+      }
+      const user = localStorage.getItem("user");
+      if (user) {
+        try {
+          const decrypted = decryptData(user);
+          const role = (decrypted?.role || "").toLowerCase();
+          const isAdminOrManager =
+            role === "admin" ||
+            role === "manager" ||
+            role === "super-admin" ||
+            role === "super" ||
+            !!decrypted?.isAdmin ||
+            !!decrypted?.isSuperAdmin;
+
+          if (isAdminOrManager) {
+            router.push("/manager");
+          } else {
+            router.push("/dashboard");
+          }
+        } catch (e) {
+          // ignore error
+        }
+      }
+    };
+    checkExistingSession();
+  }, [router]);
 
   const handleSignin = async (e) => {
     e.preventDefault();
@@ -42,20 +75,35 @@ const page = () => {
         throw new Error("No data received from server");
       }
 
-      // Log the data we're about to save
-    
-      const encryptedUser = encryptData(response.data);
+      const userData = response.data;
+      const encryptedUser = encryptData(userData);
 
       if (!encryptedUser) {
         throw new Error("Failed to encrypt user data");
       }
 
-      // Store and verify encrypted data
-      localStorage.setItem("user", encryptedUser);
+      const role = (userData.role || "").toLowerCase();
+      const isAdminOrManager =
+        role === "admin" ||
+        role === "manager" ||
+        role === "super-admin" ||
+        role === "super" ||
+        !!userData.isAdmin ||
+        !!userData.isSuperAdmin;
 
-      fetchUserData(); // Call fetchUserData to update global state
-      toast.success("Signin successful!");
-      router.push("/dashboard");
+      if (isAdminOrManager) {
+        localStorage.setItem("manager_user", encryptedUser);
+        localStorage.setItem("user", encryptedUser);
+        fetchManagerData();
+        fetchUserData();
+        toast.success("Signin successful! Redirecting to Admin Dashboard...");
+        router.push("/manager");
+      } else {
+        localStorage.setItem("user", encryptedUser);
+        fetchUserData();
+        toast.success("Signin successful!");
+        router.push("/dashboard");
+      }
     } catch (error) {
       
       toast.error(
@@ -82,7 +130,7 @@ const page = () => {
         </Link>
 
         <p className="text-center font-semibold text-xl">Welcome back!</p>
-        <h2 className="text-left text-gray-500">Signin as a User</h2>
+        <h2 className="text-left text-gray-500">Sign in to your account</h2>
         <div className="flex flex-col gap-1">
           <label>Email Address</label>
           <input

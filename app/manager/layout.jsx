@@ -7,6 +7,7 @@ import Logo from "@/assets/logo/sm-data.png";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAppContext } from "@/context/AppContext";
+import { decryptData } from "@/lib/encryption";
 import {
   FaHome,
   FaUsers,
@@ -25,19 +26,43 @@ const ManagerLayout = ({ children }) => {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const { managerData } = useAppContext();
+  const { managerData, fetchManagerData } = useAppContext();
 
   useEffect(() => {
     setIsClient(true);
-    const adminUser = localStorage.getItem("manager_user");
+    let adminUser = localStorage.getItem("manager_user");
     if (!adminUser) {
-      router.push("/manager-login");
+      const normalUser = localStorage.getItem("user");
+      if (normalUser) {
+        try {
+          const decrypted = decryptData(normalUser);
+          const role = (decrypted?.role || "").toLowerCase();
+          const isAdminOrManager =
+            role === "admin" ||
+            role === "manager" ||
+            role === "super-admin" ||
+            role === "super" ||
+            !!decrypted?.isAdmin ||
+            !!decrypted?.isSuperAdmin;
+          if (isAdminOrManager) {
+            localStorage.setItem("manager_user", normalUser);
+            adminUser = normalUser;
+            fetchManagerData();
+          }
+        } catch (e) {
+          console.error("Error decrypting user data:", e);
+        }
+      }
+    }
+    if (!adminUser) {
+      router.push("/signin");
     }
   }, [router]);
 
   const handleLogout = () => {
     localStorage.removeItem("manager_user");
-    router.push("/manager-login");
+    localStorage.removeItem("user");
+    router.push("/signin");
   };
 
   const navLinks = [

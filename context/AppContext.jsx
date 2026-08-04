@@ -96,7 +96,9 @@ export const AppContextProvider = (props) => {
 
   const logout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("manager_user");
     setUserData(null);
+    setManagerData(null);
     setCartItems({}); // Clear cart on logout
     setWishlistItems([]); // Clear wishlist on logout
     console.log("Logging out and redirecting to homepage...");
