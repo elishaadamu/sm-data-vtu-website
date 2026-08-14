@@ -25,9 +25,27 @@ const ManagerLogin = () => {
     const checkExistingSession = () => {
       const managerUser = localStorage.getItem("manager_user");
       if (managerUser) {
-        router.push("/manager");
-        return;
+        try {
+          const decrypted = decryptData(managerUser);
+          const role = (decrypted?.role || "").toLowerCase();
+          const isAdminOrManager =
+            role === "admin" ||
+            role === "manager" ||
+            role === "super-admin" ||
+            role === "super" ||
+            !!decrypted?.isAdmin ||
+            !!decrypted?.isSuperAdmin;
+          if (isAdminOrManager) {
+            router.push("/manager");
+            return;
+          } else {
+            localStorage.removeItem("manager_user");
+          }
+        } catch (e) {
+          localStorage.removeItem("manager_user");
+        }
       }
+
       const user = localStorage.getItem("user");
       if (user) {
         try {

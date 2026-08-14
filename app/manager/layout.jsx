@@ -31,7 +31,25 @@ const ManagerLayout = ({ children }) => {
   useEffect(() => {
     setIsClient(true);
     let adminUser = localStorage.getItem("manager_user");
-    if (!adminUser) {
+    let isValidManager = false;
+
+    if (adminUser) {
+      try {
+        const decrypted = decryptData(adminUser);
+        const role = (decrypted?.role || "").toLowerCase();
+        isValidManager =
+          role === "admin" ||
+          role === "manager" ||
+          role === "super-admin" ||
+          role === "super" ||
+          !!decrypted?.isAdmin ||
+          !!decrypted?.isSuperAdmin;
+      } catch (e) {
+        isValidManager = false;
+      }
+    }
+
+    if (!isValidManager) {
       const normalUser = localStorage.getItem("user");
       if (normalUser) {
         try {
@@ -46,7 +64,7 @@ const ManagerLayout = ({ children }) => {
             !!decrypted?.isSuperAdmin;
           if (isAdminOrManager) {
             localStorage.setItem("manager_user", normalUser);
-            adminUser = normalUser;
+            isValidManager = true;
             fetchManagerData();
           }
         } catch (e) {
@@ -54,15 +72,16 @@ const ManagerLayout = ({ children }) => {
         }
       }
     }
-    if (!adminUser) {
-      router.push("/signin");
+
+    if (!isValidManager) {
+      localStorage.removeItem("manager_user");
+      router.push("/manager-login");
     }
   }, [router]);
 
   const handleLogout = () => {
     localStorage.removeItem("manager_user");
-    localStorage.removeItem("user");
-    router.push("/signin");
+    router.push("/manager-login");
   };
 
   const navLinks = [
