@@ -19,6 +19,7 @@ import {
   FaCogs,
   FaSearch,
   FaGift,
+  FaUserCog,
 } from "react-icons/fa";
 import Image from "next/image";
 import Logo from "@/assets/logo/sm-data.png";
@@ -286,6 +287,16 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, handleLogout }) => {
             >
               <FaKey className="w-5 h-5" />
               <span>Set Pin</span>
+            </Link>
+
+            <Link
+              href="/dashboard/account"
+              className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg hover:bg-gray-700 transition-colors ${
+                pathname === "/dashboard/account" ? "bg-gray-700" : ""
+              }`}
+            >
+              <FaUserCog className="w-5 h-5" />
+              <span>Account Controls</span>
             </Link>
           </nav>
         </div>

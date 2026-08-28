@@ -140,7 +140,7 @@ const Footer = () => {
               {[
                 { name: "Shipping Info", href: "/shipping" },
                 { name: "Returns & Refunds", href: "/returns" },
-                { name: "Privacy Policy", href: "/privacy" },
+                { name: "Privacy Policy", href: "/privacy-policy" },
                 { name: "Terms of Service", href: "/terms" },
                 { name: "Size Guide", href: "/size-guide" },
               ].map((link, index) => (
