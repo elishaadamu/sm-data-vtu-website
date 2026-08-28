@@ -68,7 +68,8 @@ const page = () => {
     try {
       const response = await axios.post(
         apiUrl(API_CONFIG.ENDPOINTS.AUTH.SIGNIN),
-        payload
+        payload,
+        { withCredentials: true }
       );
       
       if (!response.data) {

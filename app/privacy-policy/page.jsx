@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import Logo from "@/assets/logo/sm-data.png";
 
 const sections = [
   {
@@ -32,8 +34,9 @@ export default function PrivacyPolicyPage() {
     <main className="min-h-screen bg-slate-50 text-slate-800">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5">
-          <Link href="/" className="text-xl font-extrabold tracking-tight text-slate-900">
-            <span className="text-blue-600">SM</span><span className="text-amber-500">DATA</span>
+          <Link href="/" className="flex items-center gap-3">
+            <Image src={Logo} alt="SM Data" className="h-10 w-10 rounded-xl object-contain" priority />
+            <span className="text-xl font-extrabold tracking-tight text-slate-900">SM DATA</span>
           </Link>
           <Link href="/signin" className="text-sm font-semibold text-blue-600 hover:text-blue-800">
             Sign in
@@ -63,7 +66,16 @@ export default function PrivacyPolicyPage() {
         <section className="mt-5 border border-blue-100 bg-blue-50 p-6">
           <h2 className="text-lg font-bold text-slate-950">Contact us</h2>
           <p className="mt-3 text-sm leading-7 text-slate-600">
-            For privacy questions or requests, contact <a className="font-semibold text-blue-700 hover:underline" href="mailto:support@kasuwarzamani.com.ng">support@kasuwarzamani.com.ng</a> or message our support team on WhatsApp at +234 707 377 5347.
+            For privacy questions or requests, message our support team on WhatsApp at{" "}
+            <a
+              className="font-semibold text-blue-700 hover:underline"
+              href="https://wa.me/2347073775347"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              +234 707 377 5347
+            </a>
+            .
           </p>
         </section>
       </div>

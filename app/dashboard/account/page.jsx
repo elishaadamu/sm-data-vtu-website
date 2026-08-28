@@ -15,9 +15,23 @@ export default function AccountControlsPage() {
 
   const getCurrentUser = () => {
     const storedUser = localStorage.getItem("user");
-    const user = storedUser ? decryptData(storedUser) : null;
-    if (!user?._id) throw new Error("Your session has expired. Please sign in again.");
-    return user;
+    const decryptedUser = storedUser ? decryptData(storedUser) : null;
+    const user =
+      decryptedUser?.user ||
+      decryptedUser?.data?.user ||
+      decryptedUser?.data ||
+      decryptedUser;
+    const userId = user?._id || user?.id;
+
+    if (!userId) {
+      console.error("Unable to resolve user identity from stored session:", {
+        hasStoredSession: Boolean(storedUser),
+        decryptedUser,
+      });
+      throw new Error("Your session has expired. Please sign in again.");
+    }
+
+    return { ...user, _id: userId };
   };
 
   const disableAccount = async () => {
@@ -25,11 +39,17 @@ export default function AccountControlsPage() {
     setLoading("disable");
     try {
       const user = getCurrentUser();
-      await axios.put(`${apiUrl(API_CONFIG.ENDPOINTS.PROFILE.UPDATE_USER)}/${user._id}`, { isActive: false });
+      const response = await axios.patch(
+        apiUrl(API_CONFIG.ENDPOINTS.AUTH.DISABLE_ACCOUNT),
+        { userId: user._id },
+        { withCredentials: true }
+      );
+      console.log("Disable account response:", response);
       localStorage.removeItem("user");
       toast.success("Your account has been disabled.");
       setTimeout(() => router.push("/signin"), 1000);
     } catch (error) {
+      console.error("Disable account error:", error.response || error);
       toast.error(error.response?.data?.message || error.message || "Unable to disable your account.");
     } finally {
       setLoading("");
@@ -41,11 +61,17 @@ export default function AccountControlsPage() {
     setLoading("delete");
     try {
       const user = getCurrentUser();
-      await axios.delete(`${apiUrl(API_CONFIG.ENDPOINTS.PROFILE.DELETE)}/${user._id}`);
-      localStorage.removeItem("user");
+      const response = await axios.delete(
+        apiUrl(API_CONFIG.ENDPOINTS.AUTH.DELETE_ACCOUNT),
+        { data: { userId: user._id }, withCredentials: true }
+      );
+      console.log("Delete account response:", response);
+        localStorage.removeItem("user");
       toast.success("Your account has been deleted.");
       setTimeout(() => router.push("/signup"), 1000);
     } catch (error) {
+
+        console.error("Delete account error:", error);
       toast.error(error.response?.data?.message || error.message || "Unable to delete your account.");
     } finally {
       setLoading("");

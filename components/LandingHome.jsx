@@ -310,6 +310,12 @@ const LandingHome = () => {
             >
               FAQ
             </a>
+            <Link
+              href="/privacy-policy"
+              className="transition-colors hover:text-emerald-600"
+            >
+              Privacy
+            </Link>
           </nav>
 
           <div className="flex items-center gap-3">
@@ -363,6 +369,13 @@ const LandingHome = () => {
                   {item}
                 </a>
               ))}
+              <Link
+                href="/privacy-policy"
+                onClick={() => setMobileMenuOpen(false)}
+                className="rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-emerald-600"
+              >
+                Privacy Policy
+              </Link>
               <div className="mt-2 pt-2 border-t border-slate-100 flex flex-col gap-2">
                 <Link
                   href="/signin"
@@ -1141,6 +1154,7 @@ const LandingHome = () => {
                   { label: "Buy Airtime", href: "/signin" },
                   { label: "Pay Bills", href: "/signin" },
                   { label: "BVN / NIN", href: "/signin" },
+                  { label: "Privacy Policy", href: "/privacy-policy" },
                 ].map((link) => (
                   link.isDownload ? (
                     <a

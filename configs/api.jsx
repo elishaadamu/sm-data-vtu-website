@@ -7,6 +7,8 @@ export const API_CONFIG = {
     AUTH: {
       SIGNUP: "/auth/register",
       SIGNIN: "/auth/login",
+      DISABLE_ACCOUNT: "/auth/disable-account",
+      DELETE_ACCOUNT: "/auth/delete-account",
     },
 
     ACCOUNT: {
