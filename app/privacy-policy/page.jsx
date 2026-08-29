@@ -5,7 +5,7 @@ import Logo from "@/assets/logo/sm-data.png";
 const sections = [
   {
     title: "Information we collect",
-    body: "When you create an SM DATA account or use our VTU services, we may collect your name, email address, phone number, account credentials, transaction details, wallet activity, and information you choose to add to your profile. We also receive technical information such as your IP address, browser, device, and basic usage data.",
+    body: "When you create an SM DATA account or use our VTU services, we may collect your name, email address, phone number, National Identification Number (NIN) (to create and verify your virtual account), and information you choose to add to your profile. We also receive technical information such as your IP address, browser, device, and basic usage data.",
   },
   {
     title: "How we use your information",
